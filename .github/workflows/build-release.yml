@@ -123,7 +123,7 @@ jobs:
   create-release:
     name: Publish GitHub Release
     needs: [build-web, build-desktop]
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -140,13 +140,41 @@ jobs:
         run: |
           mkdir -p release-assets
           find release-downloads/ -type f \( -name "*.exe" -o -name "*.dmg" -o -name "*.zip" -o -name "*.AppImage" -o -name "*.deb" \) -exec cp {} release-assets/ \;
-          cd release-downloads/ngaringapi-web-dist && zip -r ../../release-assets/NgaRingApi-Web-${{ github.ref_name }}.zip . && cd ../..
+          if [ -d "release-downloads/ngaringapi-web-dist" ]; then
+            cd release-downloads/ngaringapi-web-dist
+            zip -r ../../release-assets/NgaRingApi-Web.zip .
+            cd ../..
+          fi
           ls -la release-assets/
 
-      - name: Create GitHub Release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Determine Release Tag and Title
+        id: release_info
         run: |
-          gh release create ${{ github.ref_name }} release-assets/* \
-            --title "NgaRingApi ${{ github.ref_name }}" \
-            --notes "Automated release build of NgaRingApi for Windows, macOS, Linux, and Web."
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            echo "tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+            echo "title=NgaRingApi ${{ github.ref_name }}" >> $GITHUB_OUTPUT
+            echo "prerelease=false" >> $GITHUB_OUTPUT
+          else
+            echo "tag=v2.0.0-latest" >> $GITHUB_OUTPUT
+            echo "title=NgaRingApi v2.0.0 (Latest Build)" >> $GITHUB_OUTPUT
+            echo "prerelease=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.release_info.outputs.tag }}
+          name: ${{ steps.release_info.outputs.title }}
+          body: |
+            Automated production build of NgaRingApi.
+
+            ### Download Links:
+            - **Windows**: `NgaRingApi_2.0.0_x64_win.exe` (NSIS Installer)
+            - **macOS**: `NgaRingApi_2.0.0_x64_mac.dmg`, `NgaRingApi_2.0.0_arm64_mac.dmg` & `.zip`
+            - **Linux**: `NgaRingApi_2.0.0_x64_linux.AppImage` & `.deb`
+            - **Web App**: `NgaRingApi-Web.zip`
+          files: release-assets/*
+          prerelease: ${{ steps.release_info.outputs.prerelease == 'true' }}
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
