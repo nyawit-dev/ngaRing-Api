@@ -5,6 +5,7 @@ const isBenchmark = process.env.BRUNO_BENCHMARK === 'true';
 const config = {
   appId: 'com.ngaringapi.app',
   productName: isBenchmark ? 'NgaRingApi Benchmark' : 'NgaRingApi',
+  copyright: 'Copyright © 2026 NgaRingApi',
   extraMetadata: {
     brunoBuild: {
       benchmark: isBenchmark,
@@ -29,6 +30,7 @@ const config = {
   mac: {
     artifactName: 'NgaRingApi_${version}_${arch}_${os}.${ext}',
     category: 'public.app-category.developer-tools',
+    copyright: 'Copyright © 2026 NgaRingApi',
     target: [
       {
         target: 'dmg',
@@ -70,6 +72,8 @@ const config = {
   linux: {
     artifactName: 'NgaRingApi_${version}_${arch}_${os}.${ext}',
     icon: 'resources/icons/png',
+    vendor: 'NgaRingApi',
+    maintainer: 'NgaRingApi <ringga.itdev@batamfast.com>',
     target: [
       {
         target: 'AppImage',
@@ -129,7 +133,9 @@ const config = {
       }
     ],
     sign: null,
-    publisherName: 'NgaRingApi'
+    publisherName: 'NgaRingApi',
+    companyName: 'NgaRingApi',
+    legalTrademarks: 'NgaRingApi'
   },
   nsis: {
     include: 'resources/installer.nsh',
@@ -142,7 +148,8 @@ const config = {
     runAfterFinish: true,
     shortcutName: 'NgaRingApi',
     installerIcon: 'resources/icons/win/icon.ico',
-    uninstallerIcon: 'resources/icons/win/icon.ico'
+    uninstallerIcon: 'resources/icons/win/icon.ico',
+    uninstallDisplayName: 'NgaRingApi ${version}'
   }
 };
 

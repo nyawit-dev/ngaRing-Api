@@ -11,3 +11,7 @@ ManifestDPIAware true
   !define MUI_WELCOMEPAGE_TEXT "Local-first, git-friendly API IDE and client for modern developers."
   !insertmacro MUI_PAGE_WELCOME
 !macroend
+
+!macro customInstall
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\com.ngaringapi.app" "Publisher" "NgaRingApi"
+!macroend

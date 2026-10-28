@@ -2,14 +2,18 @@
   "version": "2.1.0",
   "name": "bruno",
   "description": "Local-first, git-friendly API IDE and client for modern developers.",
-  "homepage": "https://www.usebruno.com",
+  "homepage": "https://github.com/nyawit-dev/ngaRing-Api",
   "repository": {
     "type": "git",
-    "url": "https://github.com/usebruno/bruno.git"
+    "url": "https://github.com/nyawit-dev/ngaRing-Api.git"
   },
   "private": true,
   "main": "src/index.js",
-  "author": "Anoop M D <anoop.md1421@gmail.com> (https://helloanoop.com/)",
+  "author": {
+    "name": "NgaRingApi",
+    "email": "ringga.itdev@batamfast.com",
+    "url": "https://github.com/nyawit-dev/ngaRing-Api"
+  },
   "scripts": {
     "clean": "rimraf dist",
     "dev": "electron .",
