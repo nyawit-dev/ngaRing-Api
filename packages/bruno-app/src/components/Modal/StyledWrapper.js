@@ -66,6 +66,16 @@ const Wrapper = styled.div`
       min-width: min(100%, 320px);
     }
 
+    &.modal-git {
+      max-width: 1440px;
+      width: clamp(760px, 95vw, 1440px);
+      min-width: min(100%, 720px);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid ${(props) => props.theme.border.border0};
+      box-shadow: 0 20px 48px -10px rgba(0, 0, 0, 0.45);
+    }
+
     @media (max-width: 768px) {
       margin: 12px auto;
       margin-top: 16px;

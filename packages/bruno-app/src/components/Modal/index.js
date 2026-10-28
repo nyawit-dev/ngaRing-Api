@@ -7,21 +7,26 @@ import Button from 'ui/Button';
 const ESC_KEY_CODE = 27;
 const ENTER_KEY_CODE = 13;
 
-const ModalHeader = ({ title, handleCancel, customHeader, hideClose, className = '' }) => (
-  <div className={`bruno-modal-header ${className}`}>
-    {customHeader ? customHeader : <>{title ? <div className="bruno-modal-header-title">{title}</div> : null}</>}
-    {handleCancel && !hideClose ? (
-      <div
-        className="close cursor-pointer"
-        onMouseDown={(e) => e.preventDefault()}
-        onClick={handleCancel}
-        data-testid="modal-close-button"
-      >
-        <IconX size={16} strokeWidth={1.5} />
-      </div>
-    ) : null}
-  </div>
-);
+const ModalHeader = ({ title, handleCancel, customHeader, hideClose, hideHeader, className = '' }) => {
+  if (hideHeader || (!title && !customHeader && hideClose)) {
+    return null;
+  }
+  return (
+    <div className={`bruno-modal-header ${className}`}>
+      {customHeader ? customHeader : <>{title ? <div className="bruno-modal-header-title">{title}</div> : null}</>}
+      {handleCancel && !hideClose ? (
+        <div
+          className="close cursor-pointer"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={handleCancel}
+          data-testid="modal-close-button"
+        >
+          <IconX size={16} strokeWidth={1.5} />
+        </div>
+      ) : null}
+    </div>
+  );
+};
 
 const ModalContent = ({ children, noPadding }) => (
   <div className={`bruno-modal-content ${noPadding ? '' : 'px-4 py-4'}`}>{children}</div>
@@ -92,6 +97,7 @@ const Modal = ({
   hideCancel,
   hideFooter,
   hideClose,
+  hideHeader,
   footerLeft,
   disableCloseOnOutsideClick,
   disableEscapeKey,
@@ -162,6 +168,7 @@ const Modal = ({
         <ModalHeader
           title={title}
           hideClose={hideClose}
+          hideHeader={hideHeader}
           handleCancel={() => closeModal({ type: 'icon' })}
           customHeader={customHeader}
           className={headerClassName}

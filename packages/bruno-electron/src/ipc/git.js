@@ -18,7 +18,6 @@ const {
   getStagedFileDiff,
   getUnstagedFileDiff,
   initGit,
-  getAheadBehindCount,
   fetchRemotes,
   addRemote,
   fetchChanges,
@@ -99,6 +98,44 @@ const handleListRemoteBranches = async (event, { url }) => {
   return listBranchesForRemoteUrl({ url: repositoryUrl });
 };
 
+const handleGetGitStatus = async (event, { collectionPath }) => {
+  if (!collectionPath) {
+    return { isGit: false };
+  }
+  const gitRootPath = getCollectionGitRootPath(collectionPath);
+  if (!gitRootPath) {
+    return { isGit: false, collectionPath };
+  }
+
+  try {
+    const [gitData, changedFiles, remotes] = await Promise.all([
+      getCollectionGitData(gitRootPath, collectionPath),
+      getChangedFilesInCollectionGit(gitRootPath, collectionPath),
+      fetchRemotes(gitRootPath).catch(() => [])
+    ]);
+
+    return {
+      isGit: true,
+      gitRootPath,
+      ...gitData,
+      ...changedFiles,
+      remotes
+    };
+  } catch (error) {
+    console.error('Error in renderer:git-get-status:', error);
+    return {
+      isGit: true,
+      gitRootPath,
+      error: error.message,
+      branches: [],
+      staged: [],
+      unstaged: [],
+      conflicted: [],
+      remotes: []
+    };
+  }
+};
+
 const registerGitIpc = (mainWindow) => {
   ipcMain.handle('renderer:clone-git-repository', async (event, { url, path: clonePath, processUid, branch }) => {
     let directoryCreated = false;
@@ -131,45 +168,7 @@ const registerGitIpc = (mainWindow) => {
     return initGit(collectionPath);
   });
 
-  ipcMain.handle('renderer:git-get-status', async (event, { collectionPath }) => {
-    if (!collectionPath) {
-      return { isGit: false };
-    }
-    const gitRootPath = getCollectionGitRootPath(collectionPath);
-    if (!gitRootPath) {
-      return { isGit: false, collectionPath };
-    }
-
-    try {
-      const [gitData, changedFiles, aheadBehind, remotes] = await Promise.all([
-        getCollectionGitData(gitRootPath, collectionPath),
-        getChangedFilesInCollectionGit(gitRootPath, collectionPath),
-        getAheadBehindCount(gitRootPath).catch(() => ({ ahead: 0, behind: 0 })),
-        fetchRemotes(gitRootPath).catch(() => [])
-      ]);
-
-      return {
-        isGit: true,
-        gitRootPath,
-        ...gitData,
-        ...changedFiles,
-        aheadBehind,
-        remotes
-      };
-    } catch (error) {
-      console.error('Error in renderer:git-get-status:', error);
-      return {
-        isGit: true,
-        gitRootPath,
-        error: error.message,
-        branches: [],
-        staged: [],
-        unstaged: [],
-        conflicted: [],
-        remotes: []
-      };
-    }
-  });
+  ipcMain.handle('renderer:git-get-status', handleGetGitStatus);
 
   ipcMain.handle('renderer:git-stage', async (event, { gitRootPath, files }) => {
     if (!gitRootPath || !files) throw new Error('gitRootPath and files are required');
@@ -389,4 +388,4 @@ const registerGitIpc = (mainWindow) => {
 module.exports = registerGitIpc;
 module.exports.getCollectionGitRemoteUrl = getCollectionGitRemoteUrl;
 module.exports.handleListRemoteBranches = handleListRemoteBranches;
-
+module.exports.handleGetGitStatus = handleGetGitStatus;

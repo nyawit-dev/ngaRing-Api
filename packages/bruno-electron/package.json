@@ -1,7 +1,7 @@
 {
   "version": "2.0.0",
   "name": "bruno",
-  "description": "Opensource API Client for Exploring and Testing APIs",
+  "description": "Local-first, git-friendly API IDE and client for modern developers.",
   "homepage": "https://www.usebruno.com",
   "repository": {
     "type": "git",

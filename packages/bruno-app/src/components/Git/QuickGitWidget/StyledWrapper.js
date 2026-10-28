@@ -21,6 +21,9 @@ const StyledWrapper = styled.div`
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
+    border: 0;
+    background: transparent;
+    font: inherit;
     font-weight: 500;
     color: ${(props) => props.theme.text};
     cursor: pointer;
@@ -46,6 +49,8 @@ const StyledWrapper = styled.div`
     display: inline-flex;
     align-items: center;
     gap: 0.2rem;
+    border: 0;
+    font: inherit;
     font-size: 0.6875rem;
     font-weight: 600;
     color: #eab308;
@@ -63,6 +68,9 @@ const StyledWrapper = styled.div`
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
+    border: 0;
+    background: transparent;
+    font: inherit;
     font-size: 0.6875rem;
     font-weight: 600;
     cursor: pointer;
@@ -101,6 +109,14 @@ const StyledWrapper = styled.div`
       opacity: 0.5;
       cursor: not-allowed;
     }
+  }
+
+  .branch-pill:focus-visible,
+  .dirty-pill:focus-visible,
+  .ahead-behind:focus-visible,
+  .quick-sync-btn:focus-visible {
+    outline: 2px solid ${(props) => props.theme.primary.solid};
+    outline-offset: 2px;
   }
 `;
 

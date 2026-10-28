@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   IconGitBranch,
   IconArrowUp,
@@ -13,27 +13,27 @@ const QuickGitWidget = ({ collection, onOpenGitModal }) => {
   const [gitStatus, setGitStatus] = useState(null);
   const [isSyncing, setIsSyncing] = useState(false);
 
-  const fetchStatus = useCallback(async () => {
-    if (!collection?.pathname) return;
-    try {
-      const status = await getGitStatus(collection.pathname);
-      if (status?.isGit) {
-        setGitStatus(status);
-      } else {
-        setGitStatus(null);
-      }
-    } catch (err) {
-      // Non-intrusive failure
-      setGitStatus(null);
-    }
-  }, [collection?.pathname]);
-
   useEffect(() => {
-    fetchStatus();
-    // Periodically update quick status every 30 seconds
-    const interval = setInterval(fetchStatus, 30000);
-    return () => clearInterval(interval);
-  }, [fetchStatus]);
+    let isMounted = true;
+    if (!collection?.pathname) {
+      return () => {
+        isMounted = false;
+      };
+    }
+
+    getGitStatus(collection.pathname)
+      .then((status) => {
+        if (isMounted) setGitStatus(status?.isGit ? status : null);
+      })
+      .catch((err) => {
+        console.error('Failed to load quick Git status:', err);
+        if (isMounted) setGitStatus(null);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [collection?.pathname]);
 
   if (!gitStatus || !gitStatus.isGit) {
     return null;
@@ -51,13 +51,22 @@ const QuickGitWidget = ({ collection, onOpenGitModal }) => {
     try {
       setIsSyncing(true);
       await fetchGit(gitStatus.gitRootPath, 'origin');
-      if (behind > 0) {
-        await pullGit(gitStatus.gitRootPath, 'origin', currentBranch, '--no-rebase');
-        toast.success(`Pulled ${behind} new commit(s) from remote`);
+      const fetchedStatus = await getGitStatus(collection.pathname, { forceRefresh: true });
+      const fetchedBehind = fetchedStatus?.aheadBehind?.behind || 0;
+      if (fetchedBehind > 0) {
+        await pullGit(
+          gitStatus.gitRootPath,
+          'origin',
+          fetchedStatus.currentGitBranch || currentBranch,
+          '--no-rebase'
+        );
+        toast.success(`Pulled ${fetchedBehind} new commit(s) from remote`);
+        const updatedStatus = await getGitStatus(collection.pathname, { forceRefresh: true });
+        setGitStatus(updatedStatus?.isGit ? updatedStatus : null);
       } else {
         toast.success('Branch up-to-date with remote');
+        setGitStatus(fetchedStatus?.isGit ? fetchedStatus : null);
       }
-      await fetchStatus();
     } catch (err) {
       toast.error(`Sync error: ${err.message}`);
     } finally {
@@ -67,24 +76,31 @@ const QuickGitWidget = ({ collection, onOpenGitModal }) => {
 
   return (
     <StyledWrapper title={`Git Branch: ${currentBranch}`}>
-      <div className="branch-pill" onClick={onOpenGitModal}>
+      <button type="button" className="branch-pill" onClick={onOpenGitModal}>
         <IconGitBranch size={13} className="text-yellow-500 flex-shrink-0" />
         <span className="branch-name">{currentBranch}</span>
-      </div>
+      </button>
 
       {totalChanges > 0 && (
-        <div
+        <button
+          type="button"
           className="dirty-pill flex items-center gap-1"
           onClick={onOpenGitModal}
           title={`${totalChanges} uncommitted change(s)`}
+          aria-label={`Open Git changes, ${totalChanges} uncommitted change(s)`}
         >
           <span className="w-1.5 h-1.5 rounded-full bg-current inline-block" />
           <span>{totalChanges}</span>
-        </div>
+        </button>
       )}
 
       {(ahead > 0 || behind > 0) && (
-        <div className="ahead-behind" onClick={onOpenGitModal}>
+        <button
+          type="button"
+          className="ahead-behind"
+          onClick={onOpenGitModal}
+          aria-label={`Open Git status, ${ahead} commit(s) ahead and ${behind} behind`}
+        >
           {ahead > 0 && (
             <span className="ahead-count" title={`${ahead} commit(s) ahead of remote`}>
               <IconArrowUp size={12} />
@@ -97,7 +113,7 @@ const QuickGitWidget = ({ collection, onOpenGitModal }) => {
               {behind}
             </span>
           )}
-        </div>
+        </button>
       )}
 
       <button
@@ -106,6 +122,8 @@ const QuickGitWidget = ({ collection, onOpenGitModal }) => {
         onClick={handleQuickSync}
         disabled={isSyncing}
         title="Quick Fetch & Sync"
+        aria-label="Fetch and sync Git changes"
+        aria-busy={isSyncing}
       >
         <IconRefresh size={12} className={isSyncing ? 'animate-spin text-yellow-500' : ''} />
       </button>

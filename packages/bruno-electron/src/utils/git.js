@@ -338,30 +338,30 @@ const getUnstagedFileDiff = async (gitRootPath, filePath) => {
   });
 };
 
-const getCollectionGitBranches = async (gitRootPath) => {
-  return new Promise((resolve, reject) => {
+const getBranchesData = async (gitRootPath) => {
+  return new Promise((resolve) => {
+    if (!gitRootPath) return resolve({ branches: [], currentGitBranch: 'main' });
     const git = getSimpleGitInstanceForPath(gitRootPath);
     git.branchLocal((err, branches) => {
-      if (err) {
-        reject(err);
-        return;
+      if (err || !branches) {
+        return resolve({ branches: ['main'], currentGitBranch: 'main' });
       }
-      resolve(branches.all);
+      resolve({
+        branches: branches.all || [],
+        currentGitBranch: branches.current || (branches.all && branches.all[0]) || 'main'
+      });
     });
   });
 };
 
+const getCollectionGitBranches = async (gitRootPath) => {
+  const data = await getBranchesData(gitRootPath);
+  return data.branches;
+};
+
 const getCurrentGitBranch = async (gitRootPath) => {
-  return new Promise((resolve, reject) => {
-    const git = getSimpleGitInstanceForPath(gitRootPath);
-    git.branchLocal((err, branches) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-      resolve(branches.current);
-    });
-  });
+  const data = await getBranchesData(gitRootPath);
+  return data.currentGitBranch;
 };
 
 const getDefaultGitBranch = async (gitRootPath) => {
@@ -625,19 +625,25 @@ const pullGitChanges = async (win, data) => {
 async function getChangedFilesInCollectionGit(_gitRootPath, _collectionPath) {
   return new Promise((resolve, reject) => {
     const git = getSimpleGitInstanceForPath(_gitRootPath);
-    git.status(['--porcelain', _gitRootPath], async (err, status) => {
+    git.status(['--porcelain', '--branch', _gitRootPath], async (err, status) => {
       if (err) {
         reject(err);
         return;
       }
 
       const totalFiles = status?.files?.length || 0;
+      const aheadBehind = {
+        ahead: status?.ahead || 0,
+        behind: status?.behind || 0
+      };
+
       if (totalFiles > 5000) {
         return resolve({
           staged: [],
           unstaged: [],
           totalFiles,
-          tooManyFiles: true
+          tooManyFiles: true,
+          aheadBehind
         });
       }
 
@@ -680,7 +686,8 @@ async function getChangedFilesInCollectionGit(_gitRootPath, _collectionPath) {
         unstaged,
         totalFiles,
         tooManyFiles: false,
-        conflicted
+        conflicted,
+        aheadBehind
       });
     });
   });
@@ -688,23 +695,18 @@ async function getChangedFilesInCollectionGit(_gitRootPath, _collectionPath) {
 
 const getCollectionGitData = async (gitRootPath, collectionPath) => {
   if (!gitRootPath) return {};
-  const [branches, currentGitBranch, defaultGitBranch, gitRepoUrl] = await Promise.all([
-    getCollectionGitBranches(gitRootPath),
-    getCurrentGitBranch(gitRootPath),
-    getDefaultGitBranch(gitRootPath),
-    getCollectionGitRepoUrl(gitRootPath)
+  const [branchData, defaultGitBranch, gitRepoUrl] = await Promise.all([
+    getBranchesData(gitRootPath),
+    getDefaultGitBranch(gitRootPath).catch(() => 'main'),
+    getCollectionGitRepoUrl(gitRootPath).catch(() => '')
   ]);
-
-  // Fast fetch: retrieve top 20 commits for initial summary to keep status checks sub-50ms
-  const logs = branches.length ? await getCollectionGitLogs(gitRootPath, 20) : [];
 
   return {
     gitRootPath,
     gitRepoUrl,
-    branches,
-    currentGitBranch,
-    defaultGitBranch,
-    logs
+    branches: branchData.branches,
+    currentGitBranch: branchData.currentGitBranch,
+    defaultGitBranch: defaultGitBranch || 'main'
   };
 };
 

@@ -53,6 +53,20 @@ const config = {
       }
     ]
   },
+  dmg: {
+    title: 'NgaRingApi ${version}',
+    icon: 'resources/icons/mac/icon.icns',
+    iconSize: 96,
+    iconTextSize: 13,
+    window: {
+      width: 600,
+      height: 420
+    },
+    contents: [
+      { x: 160, y: 210, type: 'file' },
+      { x: 440, y: 210, type: 'link', path: '/Applications' }
+    ]
+  },
   linux: {
     artifactName: 'NgaRingApi_${version}_${arch}_${os}.${ext}',
     icon: 'resources/icons/png',
@@ -73,7 +87,11 @@ const config = {
       }
     ],
     category: 'Development',
+    synopsis: 'Local-first API IDE and client',
+    description: 'Local-first, git-friendly API IDE and client for modern developers.',
     desktop: {
+      Name: 'NgaRingApi',
+      Comment: 'Local-first, git-friendly API IDE and client for modern developers.',
       MimeType: 'x-scheme-handler/ngaringapi;'
     }
   },
@@ -116,14 +134,15 @@ const config = {
   nsis: {
     include: 'resources/installer.nsh',
     oneClick: false,
+    perMachine: false,
+    allowElevation: false,
     allowToChangeInstallationDirectory: true,
-    allowElevation: true,
     createDesktopShortcut: true,
-    createStartMenuShortcut: true
-  },
-  pkg: {
-    installLocation: '/Applications',
-    isRelocatable: false
+    createStartMenuShortcut: true,
+    runAfterFinish: true,
+    shortcutName: 'NgaRingApi',
+    installerIcon: 'resources/icons/win/icon.ico',
+    uninstallerIcon: 'resources/icons/win/icon.ico'
   }
 };
 

@@ -10,10 +10,118 @@ export const initGitRepo = async (collectionPath) => {
   return ipcRenderer.invoke('renderer:git-init', collectionPath);
 };
 
-export const getGitStatus = async (collectionPath) => {
+const gitStatusCache = new Map();
+const gitStatusRequests = new Map();
+const gitStatusRefreshRequests = new Map();
+const gitFileHistoryCache = new Map();
+const statusListeners = new Set();
+const GIT_STATUS_CACHE_TTL_MS = 60000;
+
+export const subscribeGitStatus = (callback) => {
+  statusListeners.add(callback);
+  return () => statusListeners.delete(callback);
+};
+
+export const notifyGitStatus = (collectionPath, status) => {
+  statusListeners.forEach((listener) => {
+    try {
+      listener(collectionPath, status);
+    } catch (e) {
+      console.error('Error in git status listener:', e);
+    }
+  });
+};
+
+export const invalidateGitStatus = (collectionPath) => {
+  if (collectionPath) {
+    gitStatusCache.delete(collectionPath);
+  } else {
+    gitStatusCache.clear();
+  }
+};
+
+export const getCachedGitStatus = (collectionPath) => {
+  if (!collectionPath) return null;
+  return gitStatusCache.get(collectionPath)?.status || null;
+};
+
+const requestGitStatus = (collectionPath, ipcRenderer, forceRefresh) => {
+  if (forceRefresh) {
+    gitStatusCache.delete(collectionPath);
+  }
+
+  const pendingRequest = {
+    forceRefresh,
+    promise: null
+  };
+  const request = ipcRenderer.invoke('renderer:git-get-status', { collectionPath })
+    .then((status) => {
+      if (!status?.error) {
+        gitStatusCache.set(collectionPath, {
+          status,
+          expiresAt: Date.now() + GIT_STATUS_CACHE_TTL_MS
+        });
+        notifyGitStatus(collectionPath, status);
+      }
+      return status;
+    })
+    .finally(() => {
+      if (gitStatusRequests.get(collectionPath) === pendingRequest) {
+        gitStatusRequests.delete(collectionPath);
+      }
+    });
+  pendingRequest.promise = request;
+  gitStatusRequests.set(collectionPath, pendingRequest);
+  return request;
+};
+
+export const getGitStatus = async (collectionPath, { forceRefresh = false } = {}) => {
   const { ipcRenderer } = window;
-  if (!ipcRenderer) return { isGit: false };
-  return ipcRenderer.invoke('renderer:git-get-status', { collectionPath });
+  if (!ipcRenderer || !collectionPath) return { isGit: false };
+
+  const cached = gitStatusCache.get(collectionPath);
+  const now = Date.now();
+
+  // If not forcing refresh and we have cached data:
+  if (!forceRefresh && cached) {
+    // If cache is fresh, return directly
+    if (cached.expiresAt > now) {
+      return cached.status;
+    }
+    // Stale-While-Revalidate: return stale immediately and revalidate quietly in background
+    if (!gitStatusRequests.has(collectionPath)) {
+      requestGitStatus(collectionPath, ipcRenderer, false).catch(() => {});
+    }
+    return cached.status;
+  }
+
+  const pendingRequest = gitStatusRequests.get(collectionPath);
+  if (pendingRequest && (!forceRefresh || pendingRequest.forceRefresh)) {
+    return pendingRequest.promise;
+  }
+  if (!pendingRequest) {
+    return requestGitStatus(collectionPath, ipcRenderer, forceRefresh);
+  }
+
+  const pendingRefresh = gitStatusRefreshRequests.get(collectionPath);
+  if (pendingRefresh) return pendingRefresh;
+
+  const refreshRequest = pendingRequest.promise
+    .catch(() => null)
+    .then(() => {
+      const currentRequest = gitStatusRequests.get(collectionPath);
+      if (currentRequest?.forceRefresh) {
+        return currentRequest.promise;
+      }
+      return requestGitStatus(collectionPath, ipcRenderer, true);
+    })
+    .finally(() => {
+      if (gitStatusRefreshRequests.get(collectionPath) === refreshRequest) {
+        gitStatusRefreshRequests.delete(collectionPath);
+      }
+    });
+  gitStatusRefreshRequests.set(collectionPath, refreshRequest);
+  return refreshRequest;
 };
 
 export const stageGitFiles = async (gitRootPath, files) => {
@@ -172,10 +280,21 @@ export const getGitVisualDiff = async (gitRootPath, filePath, type = 'unstaged')
   return ipcRenderer.invoke('renderer:git-visual-diff', { gitRootPath, filePath, type });
 };
 
-export const getGitFileHistory = async (gitRootPath, filePath) => {
+export const getCachedGitFileHistory = (gitRootPath, filePath) => {
+  if (!gitRootPath || !filePath) return null;
+  return gitFileHistoryCache.get(`${gitRootPath}:::${filePath}`) || null;
+};
+
+export const getGitFileHistory = async (gitRootPath, filePath, { forceRefresh = false } = {}) => {
   const { ipcRenderer } = window;
   if (!ipcRenderer) throw new Error('ipcRenderer is not available');
-  return ipcRenderer.invoke('renderer:git-file-history', { gitRootPath, filePath });
+  const cacheKey = `${gitRootPath}:::${filePath}`;
+  if (!forceRefresh && gitFileHistoryCache.has(cacheKey)) {
+    return gitFileHistoryCache.get(cacheKey);
+  }
+  const history = await ipcRenderer.invoke('renderer:git-file-history', { gitRootPath, filePath });
+  gitFileHistoryCache.set(cacheKey, history || []);
+  return history || [];
 };
 
 export const getGitFileCommitVisualDiff = async (gitRootPath, commitHash, filePath) => {

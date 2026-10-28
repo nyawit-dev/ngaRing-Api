@@ -14,6 +14,7 @@ import {
 import {
   getGitRootPath,
   getGitFileHistory,
+  getCachedGitFileHistory,
   getGitCommitFileDiff,
   getGitFileCommitVisualDiff
 } from 'utils/git/gitClient';
@@ -21,9 +22,10 @@ import VisualDiffViewer from '../VisualDiffViewer';
 import StyledWrapper from './StyledWrapper';
 
 const RequestGitHistoryModal = ({ item, collection, onClose }) => {
-  const [loading, setLoading] = useState(true);
-  const [commits, setCommits] = useState([]);
-  const [selectedCommit, setSelectedCommit] = useState(null);
+  const initialCache = getCachedGitFileHistory(collection?.pathname, item?.pathname);
+  const [loading, setLoading] = useState(!initialCache);
+  const [commits, setCommits] = useState(initialCache || []);
+  const [selectedCommit, setSelectedCommit] = useState(initialCache && initialCache[0] ? initialCache[0] : null);
   const [diffMode, setDiffMode] = useState('visual'); // 'visual' or 'raw'
   const [diffLoading, setDiffLoading] = useState(false);
   const [rawDiffText, setRawDiffText] = useState('');

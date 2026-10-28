@@ -1,4 +1,40 @@
-const { parseRemoteBranches } = require('./git');
+jest.mock('simple-git', () => jest.fn());
+
+const simpleGit = require('simple-git');
+const { parseRemoteBranches, getChangedFilesInCollectionGit } = require('./git');
+
+describe('getChangedFilesInCollectionGit', () => {
+  beforeEach(() => {
+    simpleGit.mockReset();
+  });
+
+  it('returns branch divergence counts with changed files from one status result', async () => {
+    const gitRootPath = 'git-status-counts-test';
+    const status = {
+      ahead: 2,
+      behind: 3,
+      files: [
+        { path: 'request.bru', index: 'M', working_dir: ' ' }
+      ],
+      renamed: []
+    };
+    const git = {
+      status: jest.fn((options, callback) => callback(null, status))
+    };
+    simpleGit.mockReturnValue(git);
+
+    const result = await getChangedFilesInCollectionGit(gitRootPath, gitRootPath);
+
+    expect(git.status).toHaveBeenCalledWith(
+      ['--porcelain', '--branch', gitRootPath],
+      expect.any(Function)
+    );
+    expect(result.staged).toEqual([
+      { path: 'request.bru', type: 'staged', fileIndex: 'M', working_dir: ' ' }
+    ]);
+    expect(result.aheadBehind).toEqual({ ahead: 2, behind: 3 });
+  });
+});
 
 describe('parseRemoteBranches', () => {
   it('reads the branch names and the default branch out of ls-remote output', () => {

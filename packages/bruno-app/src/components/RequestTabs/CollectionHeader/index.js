@@ -109,6 +109,12 @@ const CollectionHeader = ({ collection, isScratchCollection }) => {
   const [createWorkspaceModalOpen, setCreateWorkspaceModalOpen] = useState(false);
   const [showCreateMockServerModal, setShowCreateMockServerModal] = useState(false);
   const [showGitSyncModal, setShowGitSyncModal] = useState(false);
+  const [gitStatusRefreshKey, setGitStatusRefreshKey] = useState(0);
+
+  const closeGitSyncModal = () => {
+    setShowGitSyncModal(false);
+    setGitStatusRefreshKey((currentKey) => currentKey + 1);
+  };
 
   const [migratePillDismissed, setMigratePillDismissed] = useState(true);
   useEffect(() => {
@@ -802,7 +808,11 @@ const CollectionHeader = ({ collection, isScratchCollection }) => {
                 </ActionIcon>
               </ToolHint>
               {/* Version Control (Git) & Quick Status */}
-              <QuickGitWidget collection={collection} onOpenGitModal={() => setShowGitSyncModal(true)} />
+              <QuickGitWidget
+                key={gitStatusRefreshKey}
+                collection={collection}
+                onOpenGitModal={() => setShowGitSyncModal(true)}
+              />
               <ToolHint text="Version Control (Git)" toolhintId="GitSyncToolhintId" place="bottom">
                 <ActionIcon onClick={() => setShowGitSyncModal(true)} aria-label="Version Control (Git)" size="sm" data-testid="git-sync">
                   <IconBrandGit size={16} strokeWidth={1.5} />
@@ -825,7 +835,7 @@ const CollectionHeader = ({ collection, isScratchCollection }) => {
         </div>
       </div>
       {showGitSyncModal && (
-        <GitSyncModal collection={collection} onClose={() => setShowGitSyncModal(false)} />
+        <GitSyncModal collection={collection} onClose={closeGitSyncModal} />
       )}
     </StyledWrapper>
   );
