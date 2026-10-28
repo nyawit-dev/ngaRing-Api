@@ -16,7 +16,7 @@
 ## 2. Iconography & Mascot System
 
 - **App Icon & Logo:**
-  - An interlocking orbital ring framing a stylized geometric "N" / "R" signal node.
+  - An orbital ring framing a stylized geometric Cyber-Cat emblem with luminous cyan eyes and an integrated N-silhouette.
   - Radiant electric cyan (`#00F0FF`) transitioning to deep sapphire (`#0284C7`), set on deep obsidian.
   - Crisp at all scale factors (16x16, 24x24, 32x32, 48x48, 64x64, 128x128, 256x256, 1024x1024).
 - **In-App Icons:**
