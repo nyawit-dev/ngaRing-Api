@@ -155,8 +155,8 @@ jobs:
             echo "title=NgaRingApi ${{ github.ref_name }}" >> $GITHUB_OUTPUT
             echo "prerelease=false" >> $GITHUB_OUTPUT
           else
-            echo "tag=v2.0.0-latest" >> $GITHUB_OUTPUT
-            echo "title=NgaRingApi v2.0.0 (Latest Build)" >> $GITHUB_OUTPUT
+            echo "tag=v2.1.0-latest" >> $GITHUB_OUTPUT
+            echo "title=NgaRingApi v2.1.0 (Latest Build)" >> $GITHUB_OUTPUT
             echo "prerelease=false" >> $GITHUB_OUTPUT
           fi
 
@@ -165,13 +165,24 @@ jobs:
         with:
           tag_name: ${{ steps.release_info.outputs.tag }}
           name: ${{ steps.release_info.outputs.title }}
+          target_commitish: ${{ github.sha }}
+          generate_release_notes: true
           body: |
-            Automated production build of NgaRingApi.
+            ### NgaRingApi ${{ steps.release_info.outputs.title }}
 
-            ### Download Links:
-            - **Windows**: `NgaRingApi_2.0.0_x64_win.exe` (NSIS Installer)
-            - **macOS**: `NgaRingApi_2.0.0_x64_mac.dmg`, `NgaRingApi_2.0.0_arm64_mac.dmg` & `.zip`
-            - **Linux**: `NgaRingApi_2.0.0_x64_linux.AppImage` & `.deb`
+            Local-first, git-friendly API IDE and client for modern developers.
+
+            #### What's New:
+            - **NgaRing Git Studio Redesign**: Edge-to-edge widescreen workspace with full-screen maximize toggle.
+            - **Instant 0ms Git Load**: Zero blocking spinners using Stale-While-Revalidate caching.
+            - **Intelligent Diff Viewer**: Syntax-highlighted unified code diff + visual API diff for `.bru` request files.
+            - **Conventional Commit Composer**: One-click conventional commit type chips, character counter, and quick shortcuts.
+            - **Branding & Theme**: NgaRing cat mascot touchpoints and sleek theme tokens.
+
+            #### Download Assets:
+            - **Windows**: `NgaRingApi_2.1.0_x64_win.exe` (NSIS Installer)
+            - **macOS**: `NgaRingApi_2.1.0_x64_mac.dmg`, `NgaRingApi_2.1.0_arm64_mac.dmg` & `.zip`
+            - **Linux**: `NgaRingApi_2.1.0_x64_linux.AppImage` & `.deb`
             - **Web App**: `NgaRingApi-Web.zip`
           files: release-assets/*
           prerelease: ${{ steps.release_info.outputs.prerelease == 'true' }}
