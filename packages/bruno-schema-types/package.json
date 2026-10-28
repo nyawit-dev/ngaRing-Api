@@ -2,7 +2,7 @@
   "name": "@usebruno/schema-types",
   "version": "0.0.1",
   "description": "TypeScript types for Bruno schema",
-  "author": "Bruno Software Inc.",
+  "author": "nyawit.dev",
   "main": "dist/schema-types.js",
   "types": "dist/schema-types.d.ts",
   "files": [

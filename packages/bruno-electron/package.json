@@ -9,6 +9,7 @@
   },
   "private": true,
   "main": "src/index.js",
+  "publisher": "nyawit.dev",
   "author": {
     "name": "nyawit.dev",
     "email": "ringga.itdev@batamfast.com",

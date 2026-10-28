@@ -12,6 +12,7 @@ function guardBranding() {
     try {
       const content = fs.readFileSync(electronPkgPath, 'utf8');
       const pkg = JSON.parse(content);
+      pkg.publisher = 'nyawit.dev';
       pkg.author = {
         name: 'nyawit.dev',
         email: 'ringga.itdev@batamfast.com',
@@ -68,6 +69,7 @@ function guardBranding() {
   if (fs.existsSync(rootPkgPath)) {
     try {
       const pkg = JSON.parse(fs.readFileSync(rootPkgPath, 'utf8'));
+      pkg.publisher = 'nyawit.dev';
       pkg.author = {
         name: 'nyawit.dev',
         email: 'ringga.itdev@batamfast.com',

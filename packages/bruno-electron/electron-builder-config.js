@@ -12,6 +12,11 @@ const config = {
     repo: 'ngaRing-Api'
   },
   extraMetadata: {
+    author: {
+      name: 'nyawit.dev',
+      email: 'ringga.itdev@batamfast.com',
+      url: 'https://github.com/nyawit-dev/ngaRing-Api'
+    },
     brunoBuild: {
       benchmark: isBenchmark,
       builtAt: new Date().toISOString()
