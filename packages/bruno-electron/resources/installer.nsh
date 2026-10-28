@@ -13,6 +13,9 @@ ManifestDPIAware true
 !macroend
 
 !macro customInstall
+  WriteRegStr SHELL_CONTEXT "${UNINSTALL_REGISTRY_KEY}" "Publisher" "nyawit.dev"
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\a632ffe9-7d5d-5b3b-a2a3-bbea12298a2a" "Publisher" "nyawit.dev"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\a632ffe9-7d5d-5b3b-a2a3-bbea12298a2a" "Publisher" "nyawit.dev"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\com.ngaringapi.app" "Publisher" "nyawit.dev"
-  WriteRegStr SHCTX "${UNINSTALL_KEY}" "Publisher" "nyawit.dev"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\com.ngaringapi.app" "Publisher" "nyawit.dev"
 !macroend
