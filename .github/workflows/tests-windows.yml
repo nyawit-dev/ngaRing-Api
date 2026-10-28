@@ -1,8 +1,6 @@
 name: Windows Tests
 on:
   workflow_dispatch:
-  push:
-    branches: [main, 'release/v*']
   pull_request:
     branches: [main, 'release/v*']
 

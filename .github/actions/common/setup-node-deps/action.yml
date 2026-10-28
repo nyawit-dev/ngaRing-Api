@@ -21,7 +21,7 @@ runs:
 
     - name: Install node dependencies
       shell: ${{ inputs.shell }}
-      run: npm ci --legacy-peer-deps
+      run: npm ci --legacy-peer-deps --force
 
     - name: Build libraries
       if: inputs.skip-build != 'true'
