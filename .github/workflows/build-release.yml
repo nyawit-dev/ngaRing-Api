@@ -62,7 +62,7 @@ jobs:
           - os: windows-latest
             platform: win
             artifact_name: NgaRingApi-Windows-Installer
-          - os: macos-latest
+          - os: macos-13
             platform: mac
             artifact_name: NgaRingApi-macOS-Installer
           - os: ubuntu-latest
@@ -70,6 +70,7 @@ jobs:
             artifact_name: NgaRingApi-Linux-Packages
       fail-fast: false
     runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.platform == 'mac' }}
 
     steps:
       - name: Checkout repository
@@ -126,7 +127,7 @@ jobs:
   create-release:
     name: Publish GitHub Release
     needs: [build-web, build-desktop]
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+    if: always() && needs.build-web.result == 'success' && !cancelled() && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -136,6 +137,7 @@ jobs:
 
       - name: Download all build artifacts
         uses: actions/download-artifact@v4
+        continue-on-error: true
         with:
           path: release-downloads
 
