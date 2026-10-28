@@ -25,14 +25,11 @@ const config = {
   ],
   files: ['**/*'],
   afterSign: 'notarize.js',
+  executableName: 'NgaRingApi',
   mac: {
-    artifactName: '${name}_${version}_${arch}_${os}.${ext}',
+    artifactName: 'NgaRingApi_${version}_${arch}_${os}.${ext}',
     category: 'public.app-category.developer-tools',
     target: [
-      {
-        target: 'pkg',
-        arch: ['x64', 'arm64']
-      },
       {
         target: 'dmg',
         arch: ['x64', 'arm64']
@@ -43,47 +40,41 @@ const config = {
       }
     ],
     icon: 'resources/icons/mac/icon.icns',
-    hardenedRuntime: true,
-    identity: 'Anoop MD (W7LPPWA48L)',
-    entitlements: 'resources/entitlements.mac.plist',
-    entitlementsInherit: 'resources/entitlements.mac.plist',
+    hardenedRuntime: false,
+    identity: null,
     notarize: false,
     requirements: 'resources/app-requirements.txt',
     protocols: [
       {
-        name: 'Bruno',
+        name: 'NgaRingApi',
         schemes: [
-          'bruno'
+          'ngaringapi'
         ]
       }
     ]
   },
   linux: {
-    artifactName: '${name}_${version}_${arch}_${os}.${ext}',
+    artifactName: 'NgaRingApi_${version}_${arch}_${os}.${ext}',
     icon: 'resources/icons/png',
     target: [
       {
         target: 'AppImage',
-        arch: ['x64', 'arm64']
+        arch: ['x64']
       },
       {
         target: 'deb',
-        arch: ['x64', 'arm64']
-      },
-      {
-        target: 'rpm',
-        arch: ['x64', 'arm64']
+        arch: ['x64']
       }
     ],
     protocols: [
       {
-        name: 'Bruno',
-        schemes: ['bruno']
+        name: 'NgaRingApi',
+        schemes: ['ngaringapi']
       }
     ],
     category: 'Development',
     desktop: {
-      MimeType: 'x-scheme-handler/bruno;'
+      MimeType: 'x-scheme-handler/ngaringapi;'
     }
   },
   deb: {
@@ -111,16 +102,16 @@ const config = {
     }
   },
   win: {
-    artifactName: '${name}_${version}_${arch}_win.${ext}',
+    artifactName: 'NgaRingApi_${version}_${arch}_win.${ext}',
     icon: 'resources/icons/win/icon.ico',
     target: [
       {
         target: 'nsis',
-        arch: ['x64', 'arm64']
+        arch: ['x64']
       }
     ],
     sign: null,
-    publisherName: 'Bruno Software Inc'
+    publisherName: 'NgaRingApi'
   },
   nsis: {
     include: 'resources/installer.nsh',

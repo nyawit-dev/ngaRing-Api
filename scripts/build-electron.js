@@ -3,6 +3,12 @@ const fs = require('fs-extra');
 const { spawn } = require('child_process');
 const path = require('path');
 
+const rootDir = path.resolve(__dirname, '..');
+const electronDir = path.join(rootDir, 'packages', 'bruno-electron');
+const appDistDir = path.join(rootDir, 'packages', 'bruno-app', 'dist');
+const electronWebDir = path.join(electronDir, 'web');
+const electronOutDir = path.join(electronDir, 'out');
+
 async function deleteFileIfExists(filePath) {
   try {
     const exists = await fs.pathExists(filePath);
@@ -46,11 +52,12 @@ async function removeSourceMapFiles(directory) {
   }
 }
 
-async function execCommandWithOutput(command) {
+async function execCommandWithOutput(command, cwd) {
   return new Promise((resolve, reject) => {
     const childProcess = spawn(command, {
       stdio: 'inherit',
-      shell: true
+      shell: true,
+      cwd: cwd || rootDir
     });
     childProcess.on('error', (error) => {
       reject(error);
@@ -59,7 +66,7 @@ async function execCommandWithOutput(command) {
       if (code === 0) {
         resolve();
       } else {
-        reject(new Error(`Command exited with code ${code}.`));
+        reject(new Error(`Command "${command}" exited with code ${code}.`));
       }
     });
   });
@@ -68,38 +75,49 @@ async function execCommandWithOutput(command) {
 async function main() {
   try {
     // Remove out directory
-    await deleteFileIfExists('packages/bruno-electron/out');
+    await deleteFileIfExists(electronOutDir);
 
     // Remove web directory
-    await deleteFileIfExists('packages/bruno-electron/web');
+    await deleteFileIfExists(electronWebDir);
 
     // Create a new web directory
-    await fs.ensureDir('packages/bruno-electron/web');
-    console.log('The directory has been created successfully!');
+    await fs.ensureDir(electronWebDir);
+    console.log('The web directory has been created successfully!');
+
+    // Check if web app build exists
+    const appDistIndex = path.join(appDistDir, 'index.html');
+    const hasDist = await fs.pathExists(appDistIndex);
+    if (!hasDist) {
+      throw new Error(`Web build not found at ${appDistDir}. Run build:web first.`);
+    }
 
     // Copy build
-    await copyFolderIfExists('packages/bruno-app/dist', 'packages/bruno-electron/web');
+    await copyFolderIfExists(appDistDir, electronWebDir);
 
     // Update static paths
-    const files = await fs.readdir('packages/bruno-electron/web');
+    const files = await fs.readdir(electronWebDir);
     for (const file of files) {
       if (file.endsWith('.html')) {
-        let content = await fs.readFile(`packages/bruno-electron/web/${file}`, 'utf8');
+        const htmlPath = path.join(electronWebDir, file);
+        let content = await fs.readFile(htmlPath, 'utf8');
         content = content.replace(/\/static/g, './static');
-        await fs.writeFile(`packages/bruno-electron/web/${file}`, content);
+        await fs.writeFile(htmlPath, content);
       }
     }
 
-    // update font load paths
-    const cssDir = path.join('packages/bruno-electron/web/static/css');
+    // Update font load paths
+    const cssDir = path.join(electronWebDir, 'static', 'css');
     try {
-      const cssFiles = await fs.readdir(cssDir);
-      for (const file of cssFiles) {
-        if (file.endsWith('.css')) {
-          const filePath = path.join(cssDir, file);
-          let content = await fs.readFile(filePath, 'utf8');
-          content = content.replace(/\/static\/font/g, '../../static/font');
-          await fs.writeFile(filePath, content);
+      const cssExists = await fs.pathExists(cssDir);
+      if (cssExists) {
+        const cssFiles = await fs.readdir(cssDir);
+        for (const file of cssFiles) {
+          if (file.endsWith('.css')) {
+            const filePath = path.join(cssDir, file);
+            let content = await fs.readFile(filePath, 'utf8');
+            content = content.replace(/\/static\/font/g, '../../static/font');
+            await fs.writeFile(filePath, content);
+          }
         }
       }
     } catch (error) {
@@ -107,28 +125,33 @@ async function main() {
     }
 
     // Remove sourcemaps
-    await removeSourceMapFiles('packages/bruno-electron/web');
+    await removeSourceMapFiles(electronWebDir);
 
-    // Run npm dist command
+    // Run dist command
     console.log('Building the Electron distribution');
 
     // Determine the OS and set the appropriate argument
-    let osArg;
-    if (os.platform() === 'win32') {
-      osArg = 'win';
-    } else if (os.platform() === 'darwin') {
-      osArg = 'mac';
-    } else {
-      osArg = 'linux';
+    let osArg = process.argv[2];
+    if (!osArg) {
+      if (os.platform() === 'win32') {
+        osArg = 'win';
+      } else if (os.platform() === 'darwin') {
+        osArg = 'mac';
+      } else {
+        osArg = 'linux';
+      }
     }
 
     const isBun = typeof Bun !== 'undefined' || !!process.versions.bun;
     const distCmd = isBun
-      ? `bun run --cwd packages/bruno-electron dist:${osArg}`
-      : `npm run dist:${osArg} --workspace=packages/bruno-electron`;
-    await execCommandWithOutput(distCmd);
+      ? `bun run dist:${osArg}`
+      : `npm run dist:${osArg}`;
+    console.log(`Executing: ${distCmd} in ${electronDir}`);
+    await execCommandWithOutput(distCmd, electronDir);
+    console.log(`Electron distribution built successfully for ${osArg}!`);
   } catch (error) {
-    console.error('An error occurred:', error);
+    console.error('An error occurred during Electron build:', error);
+    process.exit(1);
   }
 }
 
