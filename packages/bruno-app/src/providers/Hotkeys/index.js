@@ -477,7 +477,11 @@ export const HotkeysProvider = (props) => {
         <NewRequest collectionUid={currentCollection?.uid} onClose={() => setShowNewRequestModal(false)} />
       )}
       {showGlobalSearchModal && (
-        <GlobalSearchModal isOpen={showGlobalSearchModal} onClose={() => setShowGlobalSearchModal(false)} />
+        <GlobalSearchModal
+          isOpen={showGlobalSearchModal}
+          onClose={() => setShowGlobalSearchModal(false)}
+          onOpenNewRequest={() => setShowNewRequestModal(true)}
+        />
       )}
       {showSaveRequestsModal && (
         <SaveRequestsModal

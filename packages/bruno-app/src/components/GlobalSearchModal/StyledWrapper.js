@@ -43,20 +43,46 @@ const StyledWrapper = styled.div`
     background: ${(props) => props.theme.modal.body.bg};
     border: 1px solid ${(props) => props.theme.border.border1};
     border-radius: 8px;
-    box-shadow: ${(props) => props.theme.shadow.md};
+    box-shadow: 0 0 24px rgba(0, 240, 255, 0.08), 0 20px 40px rgba(0, 0, 0, 0.6);
     width: 90%;
-    max-width: 600px;
-    max-height: 70vh;
+    max-width: 640px;
+    max-height: 75vh;
     display: flex;
     flex-direction: column;
     overflow: hidden;
     margin: 80px auto;
-    animation: fade-and-slide-in-from-top 0.3s forwards cubic-bezier(0.19, 1, 0.22, 1);
+    animation: fade-and-slide-in-from-top 0.25s forwards cubic-bezier(0.19, 1, 0.22, 1);
     will-change: opacity, transform;
   }
   .command-k-header {
     padding: 12px;
     border-bottom: 1px solid ${(props) => props.theme.border.border1};
+  }
+  .command-k-categories {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .category-pill {
+    padding: 3px 10px;
+    font-size: ${(props) => props.theme.font.size.xs};
+    font-weight: 500;
+    border-radius: 4px;
+    border: 1px solid ${(props) => props.theme.border.border2};
+    background: transparent;
+    color: ${(props) => props.theme.colors.text.muted};
+    cursor: pointer;
+    transition: all 0.15s ease;
+    &:hover {
+      color: ${(props) => props.theme.text};
+      border-color: ${(props) => rgba(props.theme.brand, 0.4)};
+    }
+    &.active {
+      color: ${(props) => props.theme.brand};
+      border-color: ${(props) => props.theme.brand};
+      background: ${(props) => rgba(props.theme.brand, 0.1)};
+    }
   }
   .search-input-container {
     position: relative;
@@ -144,8 +170,22 @@ const StyledWrapper = styled.div`
       background: ${(props) => rgba(props.theme.text, 0.05)};
     }
     &.selected {
-      background: ${(props) => props.theme.dropdown.hoverBg};
+      background: ${(props) => rgba(props.theme.brand, 0.08)};
+      border-left: 3px solid ${(props) => props.theme.brand};
+      padding-left: 9px;
     }
+  }
+  .command-shortcut {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 6px;
+    font-size: ${(props) => props.theme.font.size.xs};
+    font-family: var(--font-mono, monospace);
+    border-radius: 4px;
+    border: 1px solid ${(props) => props.theme.border.border2};
+    background: ${(props) => rgba(props.theme.text, 0.05)};
+    color: ${(props) => props.theme.colors.text.muted};
+    flex-shrink: 0;
   }
   .result-icon {
     display: flex;

@@ -75,6 +75,9 @@ const StyledWrapper = styled.div`
     min-width: 0;
     flex-shrink: 1;
     flex-grow: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
   }
 
   .response-pane-actions {

@@ -1,4 +1,5 @@
 export const SEARCH_TYPES = {
+  COMMAND: 'command',
   DOCUMENTATION: 'documentation',
   COLLECTION: 'collection',
   FOLDER: 'folder',
@@ -6,6 +7,7 @@ export const SEARCH_TYPES = {
 };
 
 export const MATCH_TYPES = {
+  COMMAND: 'command',
   COLLECTION: 'collection',
   FOLDER: 'folder',
   REQUEST: 'request',
@@ -24,9 +26,9 @@ export const SEARCH_CONFIG = {
 
 export const DOCUMENTATION_RESULT = {
   type: SEARCH_TYPES.DOCUMENTATION,
-  item: { id: 'docs', name: 'Bruno Documentation' },
-  name: 'Bruno Documentation',
+  item: { id: 'docs', name: 'NgaRingApi Documentation' },
+  name: 'NgaRingApi Documentation',
   path: '/',
-  description: 'Browse the official Bruno documentation',
+  description: 'Browse the official NgaRingApi documentation and guides',
   matchType: MATCH_TYPES.DOCUMENTATION
 };

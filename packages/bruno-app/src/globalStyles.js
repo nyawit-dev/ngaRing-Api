@@ -287,15 +287,9 @@ const GlobalStyle = createGlobalStyle`
   .CodeMirror-brunoVarInfo {
     color: ${(props) => props.theme.text};
     background: ${(props) => props.theme.dropdown.bg};
-    ${(props) =>
-      props.theme.dropdown.shadow && props.theme.dropdown.shadow !== 'none'
-        ? `box-shadow: ${props.theme.dropdown.shadow};`
-        : ''}
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.08), 0 12px 28px rgba(0, 0, 0, 0.45);
     border-radius: ${(props) => props.theme.border.radius.base};
-    ${(props) =>
-      props.theme.dropdown.border && props.theme.dropdown.border !== 'none'
-        ? `border: 1px solid ${props.theme.dropdown.border};`
-        : ''}
+    border: 1px solid ${(props) => props.theme.border.border2};
     box-sizing: border-box;
     font-size: ${(props) => props.theme.font.size.base};
     line-height: 1.25rem;
@@ -305,10 +299,10 @@ const GlobalStyle = createGlobalStyle`
     max-width: min(40rem, calc(100vw - 1.875rem));
     opacity: 0;
     overflow: visible;
-    padding: 0.5rem;
+    padding: 0.625rem;
     position: fixed;
-    transition: opacity 0.15s;
-    z-index: 10;
+    transition: opacity 0.15s ease;
+    z-index: 100;
   }
 
   // Autocomplete hints dropdown container
@@ -529,9 +523,9 @@ const GlobalStyle = createGlobalStyle`
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
-    padding: 0.125rem 0.375rem;
-    background: ${(props) => rgba(props.theme.brand, 0.07)};
-    border: 1px solid ${(props) => rgba(props.theme.brand, 0.08)};
+    padding: 0.125rem 0.5rem;
+    background: rgba(0, 240, 255, 0.08);
+    border: 1px solid rgba(0, 240, 255, 0.2);
     border-radius: ${(props) => props.theme.border.radius.base};
     font-size: ${(props) => props.theme.font.size.xs};
     color: ${(props) => props.theme.brand};
@@ -563,6 +557,7 @@ const GlobalStyle = createGlobalStyle`
     border: 1px solid ${(props) => props.theme.border.border2};
     border-radius: ${(props) => props.theme.border.radius.base};
     background: ${(props) => props.theme.dropdown.hoverBg};
+    font-family: var(--font-mono, monospace);
     overflow-y: auto;
     overflow-x: hidden;
     min-width: 17.3125rem;

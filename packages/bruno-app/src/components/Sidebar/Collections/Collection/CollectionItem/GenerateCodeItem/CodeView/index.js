@@ -5,16 +5,18 @@ import StyledWrapper from './StyledWrapper';
 import { useSelector } from 'react-redux';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import toast from 'react-hot-toast';
-import { IconCopy } from '@tabler/icons';
+import { IconCopy, IconCheck } from '@tabler/icons';
 import { findCollectionByItemUid, getGlobalEnvironmentVariables, getGlobalEnvironmentVariablesMasked } from 'utils/collections/index';
 import { cloneDeep } from 'lodash';
 import { useEffect, useMemo, useState } from 'react';
 import { generateSnippet } from '../utils/snippet-generator';
+
 const CodeView = ({ language, item }) => {
   const { displayedTheme } = useTheme();
   const preferences = useSelector((state) => state.app.preferences);
   const { globalEnvironments, activeGlobalEnvironmentUid } = useSelector((state) => state.globalEnvironments);
   const generateCodePrefs = useSelector((state) => state.app.generateCode);
+  const [isCopied, setIsCopied] = useState(false);
 
   let collectionOriginal = findCollectionByItemUid(
     useSelector((state) => state.collections.collections),
@@ -52,15 +54,26 @@ const CodeView = ({ language, item }) => {
     };
   }, [language, item, collection, generateCodePrefs.shouldInterpolate]);
 
+  const handleCopy = () => {
+    setIsCopied(true);
+    toast.success('Snippet copied to clipboard');
+    setTimeout(() => setIsCopied(false), 2000);
+  };
+
   return (
     <StyledWrapper>
       <CopyToClipboard
         text={snippet}
         options={{ format: 'text/plain' }}
-        onCopy={() => toast.success('Copied to clipboard!')}
+        onCopy={handleCopy}
       >
-        <button className="copy-to-clipboard">
-          <IconCopy size={20} strokeWidth={1.5} />
+        <button
+          className={`copy-to-clipboard-btn ${isCopied ? 'copied' : ''}`}
+          type="button"
+          aria-label="Copy code snippet to clipboard"
+        >
+          {isCopied ? <IconCheck size={14} strokeWidth={2} /> : <IconCopy size={14} strokeWidth={2} />}
+          <span>{isCopied ? 'Copied!' : 'Copy Code'}</span>
         </button>
       </CopyToClipboard>
       <div className="editor-content">

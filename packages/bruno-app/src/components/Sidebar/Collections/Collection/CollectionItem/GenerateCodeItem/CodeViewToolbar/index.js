@@ -48,6 +48,16 @@ const CodeViewToolbar = () => {
     }));
   };
 
+  const handleQuickSelect = (targetName) => {
+    if (languageGroups[targetName]) {
+      const defaultLibrary = languageGroups[targetName][0].libraryName;
+      dispatch(updateGenerateCode({
+        mainLanguage: targetName,
+        library: defaultLibrary
+      }));
+    }
+  };
+
   const handleInterpolateChange = (e) => {
     dispatch(updateGenerateCode({
       shouldInterpolate: e.target.checked
@@ -58,6 +68,22 @@ const CodeViewToolbar = () => {
     <StyledWrapper>
       <div className="toolbar">
         <div className="left-controls">
+          <div className="quick-lang-group">
+            {['Shell', 'JavaScript', 'Python', 'Go'].map((target) => {
+              const isSelected = generateCodePrefs.mainLanguage === target;
+              return (
+                <button
+                  key={target}
+                  type="button"
+                  className={`quick-lang-btn ${isSelected ? 'active' : ''}`}
+                  onClick={() => handleQuickSelect(target)}
+                >
+                  {target === 'Shell' ? 'cURL' : target}
+                </button>
+              );
+            })}
+          </div>
+
           <div className="select-wrapper">
             <select
               className="native-select"
@@ -66,7 +92,7 @@ const CodeViewToolbar = () => {
             >
               {mainLanguages.map((lang) => (
                 <option key={lang} value={lang}>
-                  {lang}
+                  {lang === 'Shell' ? 'Shell / cURL' : lang}
                 </option>
               ))}
             </select>

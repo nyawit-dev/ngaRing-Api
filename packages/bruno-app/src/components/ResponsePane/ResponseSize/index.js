@@ -1,5 +1,6 @@
 import React from 'react';
 import StyledWrapper from './StyledWrapper';
+import { IconDatabase } from '@tabler/icons';
 
 const ResponseSize = ({ size }) => {
   if (!Number.isFinite(size)) {
@@ -20,7 +21,8 @@ const ResponseSize = ({ size }) => {
 
   return (
     <StyledWrapper title={(size?.toLocaleString() || '0') + 'B'} className="ml-2">
-      {sizeToDisplay}
+      <IconDatabase size={12} strokeWidth={2} className="metric-icon" aria-hidden="true" />
+      <span>{sizeToDisplay}</span>
     </StyledWrapper>
   );
 };

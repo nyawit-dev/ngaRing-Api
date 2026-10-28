@@ -29,31 +29,37 @@ export const highlightText = (text, searchQuery) => {
 
 export const sortResults = (results) => {
   return results.sort((a, b) => {
-    // Documentation always first
-    if (a.type === SEARCH_TYPES.DOCUMENTATION) return -1;
-    if (b.type === SEARCH_TYPES.DOCUMENTATION) return 1;
+    // Commands first when matched
+    if (a.type === SEARCH_TYPES.COMMAND && b.type !== SEARCH_TYPES.COMMAND) return -1;
+    if (b.type === SEARCH_TYPES.COMMAND && a.type !== SEARCH_TYPES.COMMAND) return 1;
+
+    // Documentation
+    if (a.type === SEARCH_TYPES.DOCUMENTATION && b.type !== SEARCH_TYPES.DOCUMENTATION) return -1;
+    if (b.type === SEARCH_TYPES.DOCUMENTATION && a.type !== SEARCH_TYPES.DOCUMENTATION) return 1;
 
     // Sort by match type priority
     const matchTypeOrder = {
-      [MATCH_TYPES.COLLECTION]: 0,
-      [MATCH_TYPES.FOLDER]: 1,
-      [MATCH_TYPES.REQUEST]: 2,
-      [MATCH_TYPES.URL]: 3,
-      [MATCH_TYPES.PATH]: 4
+      [MATCH_TYPES.COMMAND]: 0,
+      [MATCH_TYPES.COLLECTION]: 1,
+      [MATCH_TYPES.FOLDER]: 2,
+      [MATCH_TYPES.REQUEST]: 3,
+      [MATCH_TYPES.URL]: 4,
+      [MATCH_TYPES.PATH]: 5
     };
-    const aMatchType = matchTypeOrder[a.matchType] ?? 5;
-    const bMatchType = matchTypeOrder[b.matchType] ?? 5;
+    const aMatchType = matchTypeOrder[a.matchType] ?? 6;
+    const bMatchType = matchTypeOrder[b.matchType] ?? 6;
 
     if (aMatchType !== bMatchType) return aMatchType - bMatchType;
 
     // Sort by type priority
     const typeOrder = {
-      [SEARCH_TYPES.COLLECTION]: 0,
-      [SEARCH_TYPES.FOLDER]: 1,
-      [SEARCH_TYPES.REQUEST]: 2
+      [SEARCH_TYPES.COMMAND]: 0,
+      [SEARCH_TYPES.COLLECTION]: 1,
+      [SEARCH_TYPES.FOLDER]: 2,
+      [SEARCH_TYPES.REQUEST]: 3
     };
-    const aType = typeOrder[a.type] ?? 3;
-    const bType = typeOrder[b.type] ?? 3;
+    const aType = typeOrder[a.type] ?? 4;
+    const bType = typeOrder[b.type] ?? 4;
 
     if (aType !== bType) return aType - bType;
 
@@ -64,6 +70,7 @@ export const sortResults = (results) => {
 
 export const getTypeLabel = (type) => {
   const baseLabels = {
+    [SEARCH_TYPES.COMMAND]: 'Command',
     [SEARCH_TYPES.DOCUMENTATION]: 'Documentation',
     [SEARCH_TYPES.COLLECTION]: 'Collection',
     [SEARCH_TYPES.FOLDER]: 'Folder'

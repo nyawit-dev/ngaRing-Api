@@ -13,7 +13,42 @@ const StyledWrapper = styled.div`
   .left-controls {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
+  }
+
+  .quick-lang-group {
+    display: flex;
+    gap: 3px;
+    background: ${(props) => props.theme.dropdown?.bg || 'rgba(0, 0, 0, 0.2)'};
+    padding: 2px;
+    border-radius: 4px;
+    border: 1px solid ${(props) => props.theme.border?.border2 || 'rgba(255, 255, 255, 0.08)'};
+  }
+
+  .quick-lang-btn {
+    height: 28px;
+    padding: 0 10px;
+    background: transparent;
+    border: none;
+    border-radius: 3px;
+    color: ${(props) => props.theme.colors?.text?.muted || props.theme.text};
+    font-size: ${(props) => props.theme.font.size.xs || '0.75rem'};
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+
+    &:hover {
+      color: ${(props) => props.theme.text};
+      background: ${(props) => props.theme.dropdown?.hoverBg || 'rgba(255, 255, 255, 0.05)'};
+    }
+
+    &.active {
+      background: ${(props) => props.theme.brand};
+      color: #0D1117;
+      font-weight: 600;
+    }
   }
 
   .select-wrapper {
