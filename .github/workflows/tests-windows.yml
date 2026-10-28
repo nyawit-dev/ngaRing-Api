@@ -16,7 +16,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup Node Dependencies
         uses: ./.github/actions/common/setup-node-deps
@@ -36,7 +36,7 @@ jobs:
       pull-requests: write
       contents: read
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup Node Dependencies
         uses: ./.github/actions/common/setup-node-deps
@@ -67,7 +67,7 @@ jobs:
       pull-requests: write
       contents: read
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup Node Dependencies
         uses: ./.github/actions/common/setup-node-deps
@@ -96,7 +96,7 @@ jobs:
     timeout-minutes: 240
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup Node Dependencies
         uses: ./.github/actions/common/setup-node-deps
@@ -126,7 +126,7 @@ jobs:
       pull-requests: write
       contents: read
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup Node Dependencies
         uses: ./.github/actions/common/setup-node-deps
@@ -160,7 +160,7 @@ jobs:
       pull-requests: write
       contents: read
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup Node Dependencies
         uses: ./.github/actions/common/setup-node-deps
