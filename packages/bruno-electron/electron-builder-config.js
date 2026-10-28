@@ -6,6 +6,11 @@ const config = {
   appId: 'com.ngaringapi.app',
   productName: isBenchmark ? 'NgaRingApi Benchmark' : 'NgaRingApi',
   copyright: 'Copyright © 2026 NgaRingApi',
+  publish: {
+    provider: 'github',
+    owner: 'nyawit-dev',
+    repo: 'ngaRing-Api'
+  },
   extraMetadata: {
     brunoBuild: {
       benchmark: isBenchmark,
