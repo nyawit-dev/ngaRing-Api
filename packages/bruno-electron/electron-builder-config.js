@@ -35,7 +35,6 @@ const config = {
   mac: {
     artifactName: 'NgaRingApi_${version}_${arch}_${os}.${ext}',
     category: 'public.app-category.developer-tools',
-    copyright: 'Copyright © 2026 NgaRingApi',
     target: [
       {
         target: 'dmg',
@@ -139,7 +138,6 @@ const config = {
     ],
     sign: null,
     publisherName: 'NgaRingApi',
-    companyName: 'NgaRingApi',
     legalTrademarks: 'NgaRingApi'
   },
   nsis: {
