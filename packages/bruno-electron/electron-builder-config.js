@@ -5,7 +5,7 @@ const isBenchmark = process.env.BRUNO_BENCHMARK === 'true';
 const config = {
   appId: 'com.ngaringapi.app',
   productName: isBenchmark ? 'NgaRingApi Benchmark' : 'NgaRingApi',
-  copyright: 'Copyright © 2026 NgaRingApi',
+  copyright: 'Copyright © 2026 nyawit.dev',
   publish: {
     provider: 'github',
     owner: 'nyawit-dev',
@@ -76,8 +76,8 @@ const config = {
   linux: {
     artifactName: 'NgaRingApi_${version}_${arch}_${os}.${ext}',
     icon: 'resources/icons/png',
-    vendor: 'NgaRingApi',
-    maintainer: 'NgaRingApi <ringga.itdev@batamfast.com>',
+    vendor: 'nyawit.dev',
+    maintainer: 'nyawit.dev <ringga.itdev@batamfast.com>',
     target: [
       {
         target: 'AppImage',
@@ -137,8 +137,8 @@ const config = {
       }
     ],
     sign: null,
-    publisherName: 'NgaRingApi',
-    legalTrademarks: 'NgaRingApi'
+    publisherName: 'nyawit.dev',
+    legalTrademarks: 'nyawit.dev'
   },
   nsis: {
     include: 'resources/installer.nsh',

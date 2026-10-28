@@ -13,7 +13,7 @@ function guardBranding() {
       const content = fs.readFileSync(electronPkgPath, 'utf8');
       const pkg = JSON.parse(content);
       pkg.author = {
-        name: 'NgaRingApi',
+        name: 'nyawit.dev',
         email: 'ringga.itdev@batamfast.com',
         url: 'https://github.com/nyawit-dev/ngaRing-Api'
       };
@@ -50,11 +50,11 @@ function guardBranding() {
       if (!code.includes("executableName: 'NgaRingApi'")) {
         code = code.replace(/executableName:\s*['"][^'"]*['"],/, "executableName: 'NgaRingApi',");
       }
-      if (!code.includes("copyright: 'Copyright © 2026 NgaRingApi'")) {
-        code = code.replace(/const config = {/, "const config = {\n  copyright: 'Copyright © 2026 NgaRingApi',");
+      if (!code.includes("copyright: 'Copyright © 2026 nyawit.dev'")) {
+        code = code.replace(/const config = {/, "const config = {\n  copyright: 'Copyright © 2026 nyawit.dev',");
       }
-      if (!code.includes("publisherName: 'NgaRingApi'")) {
-        code = code.replace(/publisherName:\s*['"][^'"]*['"]/, "publisherName: 'NgaRingApi'");
+      if (!code.includes("publisherName: 'nyawit.dev'")) {
+        code = code.replace(/publisherName:\s*['"][^'"]*['"]/, "publisherName: 'nyawit.dev'");
       }
       fs.writeFileSync(builderConfigPath, code);
       console.log('✓ Guarded packages/bruno-electron/electron-builder-config.js');
@@ -69,7 +69,7 @@ function guardBranding() {
     try {
       const pkg = JSON.parse(fs.readFileSync(rootPkgPath, 'utf8'));
       pkg.author = {
-        name: 'NgaRingApi',
+        name: 'nyawit.dev',
         email: 'ringga.itdev@batamfast.com',
         url: 'https://github.com/nyawit-dev/ngaRing-Api'
       };
@@ -78,6 +78,19 @@ function guardBranding() {
       console.log('✓ Guarded root package.json');
     } catch (err) {
       console.warn('Warning guarding root package.json:', err.message);
+    }
+  }
+
+  // 4. Guard packages/bruno-electron/resources/installer.nsh
+  const installerNshPath = path.join(rootDir, 'packages', 'bruno-electron', 'resources', 'installer.nsh');
+  if (fs.existsSync(installerNshPath)) {
+    try {
+      let nsh = fs.readFileSync(installerNshPath, 'utf8');
+      nsh = nsh.replace(/"Publisher"\s+"[^"]*"/g, '"Publisher" "nyawit.dev"');
+      fs.writeFileSync(installerNshPath, nsh);
+      console.log('✓ Guarded packages/bruno-electron/resources/installer.nsh');
+    } catch (err) {
+      console.warn('Warning guarding installer.nsh:', err.message);
     }
   }
 

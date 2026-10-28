@@ -80,7 +80,7 @@ module.exports = function aboutNgaRingApi({ version }) {
         Fast, Git-friendly API development and testing environment.
       </div>
       <footer class="footer">
-          ©${currentYear} NgaRingApi
+          ©${currentYear} nyawit.dev
       </footer>
     </body>
     </html>

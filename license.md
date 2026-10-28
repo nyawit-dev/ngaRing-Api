@@ -28,5 +28,5 @@ SOFTWARE.
 ---
 
 ## Modifications and Rebranding (NgaRingApi)
-Copyright (c) 2026 Ringga
+Copyright (c) 2026 nyawit.dev
 Licensed under the MIT License.
