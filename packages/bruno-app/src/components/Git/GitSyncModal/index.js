@@ -28,7 +28,9 @@ import {
   IconLayoutColumns,
   IconSearch,
   IconRotate2,
-  IconFolder
+  IconFolder,
+  IconMaximize,
+  IconMinimize
 } from '@tabler/icons';
 import {
   getGitStatus,
@@ -72,6 +74,7 @@ const GitSyncModal = ({ collection, onClose }) => {
   const initialCache = getCachedGitStatus(collectionPath);
 
   const [activeTab, setActiveTab] = useState('changes');
+  const [isMaximized, setIsMaximized] = useState(false);
   const [gitStatus, setGitStatus] = useState(initialCache);
   const [loading, setLoading] = useState(!initialCache);
   const [isRefreshingStatus, setIsRefreshingStatus] = useState(false);
@@ -850,7 +853,7 @@ const GitSyncModal = ({ collection, onClose }) => {
   // -------------------------------------------------------------
   return (
     <Modal
-      size="git"
+      size={isMaximized ? 'git is-maximized' : 'git'}
       hideHeader={true}
       hideClose={true}
       handleCancel={onClose}
@@ -858,7 +861,7 @@ const GitSyncModal = ({ collection, onClose }) => {
       noPadding={true}
       disableCloseOnOutsideClick={true}
     >
-      <StyledWrapper>
+      <StyledWrapper className={isMaximized ? 'is-maximized' : ''}>
         {/* Top Header Bar */}
         <div className="git-header-bar">
           <div className="git-header-left">
@@ -1056,6 +1059,16 @@ const GitSyncModal = ({ collection, onClose }) => {
                 aria-label="Refresh Git status"
               >
                 <IconRefresh size={14} />
+              </button>
+
+              <button
+                type="button"
+                className="icon-btn-maximize"
+                onClick={() => setIsMaximized((prev) => !prev)}
+                title={isMaximized ? 'Restore dialog' : 'Maximize to fullscreen'}
+                aria-label={isMaximized ? 'Restore dialog' : 'Maximize to fullscreen'}
+              >
+                {isMaximized ? <IconMinimize size={16} /> : <IconMaximize size={16} />}
               </button>
 
               <button type="button" className="icon-btn-close" onClick={onClose} aria-label="Close Git modal">

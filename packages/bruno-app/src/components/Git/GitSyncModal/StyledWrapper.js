@@ -19,13 +19,20 @@ const StyledWrapper = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: clamp(560px, 86vh, 920px);
-  max-height: calc(100vh - 60px);
-  min-height: 480px;
+  height: clamp(660px, 92vh, 1080px);
+  max-height: calc(100vh - 32px);
+  min-height: 540px;
   overflow: hidden;
   color: ${(props) => props.theme.text};
   background-color: ${(props) => props.theme.background.base};
   box-sizing: border-box;
+
+  &.is-maximized {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    min-height: 100vh !important;
+    border-radius: 0 !important;
+  }
 
   /* Global focus states */
   button:focus-visible,
@@ -380,6 +387,7 @@ const StyledWrapper = styled.div`
       }
     }
 
+    .icon-btn-maximize,
     .icon-btn-close {
       display: inline-flex;
       align-items: center;
@@ -447,9 +455,9 @@ const StyledWrapper = styled.div`
 
   /* Left Panel: Files & Commit Composer */
   .git-files-panel {
-    width: 360px;
-    min-width: 280px;
-    max-width: 420px;
+    width: 410px;
+    min-width: 320px;
+    max-width: 500px;
     display: flex;
     flex-direction: column;
     border-right: 1px solid ${(props) => props.theme.border.border0};
@@ -1097,8 +1105,8 @@ const StyledWrapper = styled.div`
     }
 
     .history-list-pane {
-      width: 380px;
-      min-width: 300px;
+      width: 430px;
+      min-width: 320px;
       border-right: 1px solid ${(props) => props.theme.border.border0};
       background-color: ${(props) => props.theme.background.mantle};
       display: flex;

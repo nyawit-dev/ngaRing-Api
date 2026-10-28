@@ -67,13 +67,25 @@ const Wrapper = styled.div`
     }
 
     &.modal-git {
-      max-width: 1440px;
-      width: clamp(760px, 95vw, 1440px);
-      min-width: min(100%, 720px);
-      border-radius: 12px;
+      max-width: 1780px;
+      width: clamp(860px, 97vw, 1780px);
+      min-width: min(100%, 800px);
+      margin: clamp(8px, 1.5vh, 20px) auto !important;
+      border-radius: 14px;
       overflow: hidden;
       border: 1px solid ${(props) => props.theme.border.border0};
-      box-shadow: 0 20px 48px -10px rgba(0, 0, 0, 0.45);
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.55);
+      transition: width 0.2s cubic-bezier(0.16, 1, 0.3, 1), height 0.2s cubic-bezier(0.16, 1, 0.3, 1), margin 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+
+      &.is-maximized {
+        width: 100vw !important;
+        max-width: 100vw !important;
+        height: 100vh !important;
+        max-height: 100vh !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        border: none !important;
+      }
     }
 
     @media (max-width: 768px) {
