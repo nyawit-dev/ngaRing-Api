@@ -1,7 +1,11 @@
+# NgaRingApi License
 
+NgaRingApi is a derivative work and fork of Bruno.
+
+## Original Work (Bruno)
 MIT License
-
 Copyright (c) 2022 Anoop M D, Anusree P S and Contributors
+https://github.com/usebruno/bruno
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -20,3 +24,9 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+
+## Modifications and Rebranding (NgaRingApi)
+Copyright (c) 2026 Ringga
+Licensed under the MIT License.

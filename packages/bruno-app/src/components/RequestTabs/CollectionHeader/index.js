@@ -18,10 +18,13 @@ import {
   IconFileOff,
   IconCode,
   IconAppWindow,
-  IconTransform
+  IconTransform,
+  IconBrandGit
 } from '@tabler/icons';
 import IconSparkles from 'components/Icons/IconSparkles';
 import OpenAPISyncIcon from 'components/Icons/OpenAPISync';
+import GitSyncModal from 'components/Git/GitSyncModal';
+import QuickGitWidget from 'components/Git/QuickGitWidget';
 import { switchWorkspace, renameWorkspaceAction, exportWorkspaceAction, confirmWorkspaceCreation, cancelWorkspaceCreation } from 'providers/ReduxStore/slices/workspaces/actions';
 import { updateWorkspace } from 'providers/ReduxStore/slices/workspaces';
 import { showInFolder } from 'providers/ReduxStore/slices/collections/actions';
@@ -105,6 +108,7 @@ const CollectionHeader = ({ collection, isScratchCollection }) => {
   const [closeWorkspaceModalOpen, setCloseWorkspaceModalOpen] = useState(false);
   const [createWorkspaceModalOpen, setCreateWorkspaceModalOpen] = useState(false);
   const [showCreateMockServerModal, setShowCreateMockServerModal] = useState(false);
+  const [showGitSyncModal, setShowGitSyncModal] = useState(false);
 
   const [migratePillDismissed, setMigratePillDismissed] = useState(true);
   useEffect(() => {
@@ -335,6 +339,7 @@ const CollectionHeader = ({ collection, isScratchCollection }) => {
     ...(isMockServerEnabled
       ? [{ id: 'mock-server', label: 'Mock Server', leftSection: IconServer2, onClick: viewMockServer }]
       : []),
+    { id: 'git-sync', label: 'Version Control (Git)', leftSection: IconBrandGit, onClick: () => setShowGitSyncModal(true) },
     { id: 'collection-settings', label: 'Collection Settings', leftSection: IconSettings, onClick: viewCollectionSettings }
   ];
 
@@ -796,6 +801,13 @@ const CollectionHeader = ({ collection, isScratchCollection }) => {
                   <IconRun size={16} strokeWidth={1.5} />
                 </ActionIcon>
               </ToolHint>
+              {/* Version Control (Git) & Quick Status */}
+              <QuickGitWidget collection={collection} onOpenGitModal={() => setShowGitSyncModal(true)} />
+              <ToolHint text="Version Control (Git)" toolhintId="GitSyncToolhintId" place="bottom">
+                <ActionIcon onClick={() => setShowGitSyncModal(true)} aria-label="Version Control (Git)" size="sm" data-testid="git-sync">
+                  <IconBrandGit size={16} strokeWidth={1.5} />
+                </ActionIcon>
+              </ToolHint>
               {/* JS Sandbox Mode - always visible */}
               <JsSandboxMode collection={collection} />
               {/* Overflow menu */}
@@ -812,6 +824,9 @@ const CollectionHeader = ({ collection, isScratchCollection }) => {
           )}
         </div>
       </div>
+      {showGitSyncModal && (
+        <GitSyncModal collection={collection} onClose={() => setShowGitSyncModal(false)} />
+      )}
     </StyledWrapper>
   );
 };

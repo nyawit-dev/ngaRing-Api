@@ -19,7 +19,8 @@ import {
   IconInfoCircle,
   IconTerminal2,
   IconAppWindow,
-  IconEyeOff
+  IconEyeOff,
+  IconGitCommit
 } from '@tabler/icons';
 import { useSelector, useDispatch, useStore } from 'react-redux';
 import { addTab, focusTab, makeTabPermanent } from 'providers/ReduxStore/slices/tabs';
@@ -45,6 +46,7 @@ import StyledWrapper from './StyledWrapper';
 import NetworkError from 'components/ResponsePane/NetworkError/index';
 import CollectionItemInfo from '../CollectionItemInfo/index';
 import CollectionItemIcon from '../CollectionItemIcon';
+import RequestGitHistoryModal from 'components/Git/RequestGitHistoryModal';
 import InvalidFilesBadge from '../../InvalidFilesBadge';
 import ExampleIcon from 'components/Icons/ExampleIcon';
 import {
@@ -134,6 +136,7 @@ const CollectionItemRow = ({
   const [newAppModalOpen, setNewAppModalOpen] = useState(false);
   const [runCollectionModalOpen, setRunCollectionModalOpen] = useState(false);
   const [itemInfoModalOpen, setItemInfoModalOpen] = useState(false);
+  const [gitHistoryModalOpen, setGitHistoryModalOpen] = useState(false);
   const examplesExpanded = !isCollectionItemCollapsed(item);
   const [isKeyboardFocused, setIsKeyboardFocused] = useState(false);
   const hasSearchText = searchText && searchText?.trim()?.length;
@@ -542,6 +545,15 @@ const CollectionItemRow = ({
       onClick: () => setItemInfoModalOpen(true)
     });
 
+    if (!isFolder && isItemARequest(item)) {
+      items.push({
+        id: 'git-history',
+        leftSection: IconGitCommit,
+        label: 'Git History',
+        onClick: () => setGitHistoryModalOpen(true)
+      });
+    }
+
     if (isFolder) {
       items.push(
         {
@@ -747,6 +759,9 @@ const CollectionItemRow = ({
       )}
       {itemInfoModalOpen && (
         <CollectionItemInfo item={item} onClose={() => setItemInfoModalOpen(false)} />
+      )}
+      {gitHistoryModalOpen && (
+        <RequestGitHistoryModal item={item} collection={collection} onClose={() => setGitHistoryModalOpen(false)} />
       )}
       <CreateExampleModal
         isOpen={createExampleModalOpen}

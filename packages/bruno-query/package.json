@@ -15,7 +15,7 @@
   "scripts": {
     "clean": "rimraf dist",
     "test": "jest",
-    "prebuild": "npm run clean",
+    "prebuild": "rimraf dist",
     "build": "rollup -c",
     "watch": "rollup -c -w",
     "prepack": "npm run test && npm run build"

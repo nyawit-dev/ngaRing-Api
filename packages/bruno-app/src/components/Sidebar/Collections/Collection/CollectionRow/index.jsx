@@ -22,7 +22,8 @@ import {
   IconBook,
   IconServer,
   IconFileArrowRight,
-  IconAppWindow
+  IconAppWindow,
+  IconBrandGit
 } from '@tabler/icons';
 import OpenAPISyncIcon from 'components/Icons/OpenAPISync';
 import { toggleCollection, collapseFullCollection, clearSidebarSelection } from 'providers/ReduxStore/slices/collections';
@@ -57,6 +58,7 @@ import useKeybindingDisplayText from 'hooks/useKeybindingDisplayText';
 import { useBetaFeature, BETA_FEATURES } from 'utils/beta-features';
 import StatusBadge from 'ui/StatusBadge';
 import CreateMockServerModal from 'components/MockServer/CreateMockServerModal';
+import GitSyncModal from 'components/Git/GitSyncModal';
 import useSidebarSelectionClick from 'hooks/useSidebarSelectionClick';
 import { startBlockedDragTracking } from 'utils/dragBlockedCursor';
 
@@ -73,6 +75,7 @@ const CollectionRow = ({ collection, searchText, openBulkMenu, children, isColle
   const [showRemoveCollectionModal, setShowRemoveCollectionModal] = useState(false);
   const [showMoveToWorkspaceModal, setShowMoveToWorkspaceModal] = useState(false);
   const [showCreateMockServerModal, setShowCreateMockServerModal] = useState(false);
+  const [showGitSyncModal, setShowGitSyncModal] = useState(false);
   const [dropType, setDropType] = useState(null);
   const [isKeyboardFocused, setIsKeyboardFocused] = useState(false);
   const dispatch = useDispatch();
@@ -504,6 +507,15 @@ const CollectionRow = ({ collection, searchText, openBulkMenu, children, isColle
       onClick: viewCollectionSettings
     },
     {
+      id: 'git-sync',
+      leftSection: IconBrandGit,
+      label: 'Version Control (Git)',
+      onClick: () => {
+        ensureCollectionIsMounted();
+        setShowGitSyncModal(true);
+      }
+    },
+    {
       id: 'terminal',
       leftSection: IconTerminal2,
       label: 'Open in Terminal',
@@ -564,6 +576,9 @@ const CollectionRow = ({ collection, searchText, openBulkMenu, children, isColle
       )}
       {showCloneCollectionModalOpen && (
         <CloneCollection collectionUid={collection.uid} onClose={() => setShowCloneCollectionModalOpen(false)} />
+      )}
+      {showGitSyncModal && (
+        <GitSyncModal collection={collection} onClose={() => setShowGitSyncModal(false)} />
       )}
       {showCreateMockServerModal && (
         <CreateMockServerModal

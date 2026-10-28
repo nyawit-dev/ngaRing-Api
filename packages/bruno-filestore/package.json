@@ -12,7 +12,7 @@
   ],
   "scripts": {
     "clean": "rimraf dist",
-    "prebuild": "npm run clean",
+    "prebuild": "rimraf dist",
     "build": "rollup -c && tsc --emitDeclarationOnly -p tsconfig.build.json",
     "watch": "rollup -c -w",
     "test": "jest",

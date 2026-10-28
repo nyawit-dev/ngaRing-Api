@@ -1,10 +1,21 @@
 import React from 'react';
 
-const SendIcon = ({ color, width }) => {
+const SendIcon = ({ color = 'currentColor', width = 16, height = 16 }) => {
+  const size = width || height || 16;
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width={width} height={width} viewBox="0 0 48 48">
-      <path fill={color} d="M4.02 42l41.98-18-41.98-18-.02 14 30 4-30 4z" />
-      <path d="M0 0h48v48h-48z" fill="none" />
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <line x1="22" y1="2" x2="11" y2="13" />
+      <polygon points="22 2 15 22 11 13 2 9 22 2" fill="currentColor" fillOpacity="0.15" />
     </svg>
   );
 };

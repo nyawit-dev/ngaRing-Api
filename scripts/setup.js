@@ -66,6 +66,7 @@ const glob = function (startPath, pattern) {
 };
 
 function forceInstallPlatformDeps() {
+  const isBun = typeof Bun !== 'undefined' || !!process.versions.bun;
   // Note: make sure to hard pin deps and only add deps that have been checked
   // for sec vuln already since the following will be force installed.
   const deps = {
@@ -78,13 +79,17 @@ function forceInstallPlatformDeps() {
   if (!deps[process.platform] || (Array.isArray(deps[process.platform]) && deps[process.platform].length === 0)) return;
 
   const toInstall = deps[process.platform];
+  const installCmd = isBun
+    ? `bun add -d ${toInstall.join(' ')}`
+    : `npm i --legacy-peer-deps --no-save --force ${toInstall.join(' ')}`;
   execCommand(
-    `npm i --legacy-peer-deps --no-save --force ${toInstall.join(' ')}`,
+    installCmd,
     'Installing platform specific dependencies'
   );
 }
 
 async function setup() {
+  const isBun = typeof Bun !== 'undefined' || !!process.versions.bun;
   try {
     // Clean up node_modules (if exists)
     console.log(`\n${icons.clean} Cleaning up node_modules directories...`);
@@ -92,26 +97,47 @@ async function setup() {
       !PRESERVED_NODE_MODULES_PREFIXES.some((prefix) => dir.startsWith(prefix))
     );
     for (const dir of nodeModulesPaths) {
-      console.log(`${icons.delete} Removing ${dir}`);
-      fs.rmSync(dir, { recursive: true, force: true });
+      try {
+        console.log(`${icons.delete} Removing ${dir}`);
+        fs.rmSync(dir, { recursive: true, force: true });
+      } catch (err) {
+        console.warn(`Warning: Could not remove ${dir} (${err.message}). Proceeding...`);
+      }
     }
 
     // Install dependencies
-    execCommand('npm i --legacy-peer-deps', 'Installing dependencies');
-    forceInstallPlatformDeps();
+    if (isBun) {
+      execCommand('bun install --ignore-scripts', 'Installing dependencies with Bun');
+      execCommand('bun node_modules/electron/install.js', 'Installing electron binaries');
+      forceInstallPlatformDeps();
 
-    // Build packages
-    execCommand('npm run build:graphql-docs', 'Building graphql-docs');
-    execCommand('npm run build:bruno-query', 'Building bruno-query');
-    execCommand('npm run build:bruno-common', 'Building bruno-common');
-    execCommand('npm run build:bruno-converters', 'Building bruno-converters');
-    execCommand('npm run build:bruno-requests', 'Building bruno-requests');
-    execCommand('npm run build:schema-types', 'Building schema-types');
-    execCommand('npm run build:bruno-filestore', 'Building bruno-filestore');
-    execCommand('npm run build:bruno-sqlite', 'Building bruno-sqlite');
+      // Build packages with Bun
+      execCommand('bun run --cwd packages/bruno-graphql-docs build', 'Building graphql-docs');
+      execCommand('bun run --cwd packages/bruno-query rollup -c', 'Building bruno-query');
+      execCommand('bun run --cwd packages/bruno-common rollup -c rollup.config.js', 'Building bruno-common');
+      execCommand('bun run --cwd packages/bruno-converters rollup -c', 'Building bruno-converters');
+      execCommand('bun run --cwd packages/bruno-requests rollup -c', 'Building bruno-requests');
+      execCommand('bun run --cwd packages/bruno-schema-types tsc -p tsconfig.json', 'Building schema-types');
+      execCommand('bun run --cwd packages/bruno-filestore rollup -c && bun run --cwd packages/bruno-filestore tsc --emitDeclarationOnly -p tsconfig.build.json', 'Building bruno-filestore');
+      execCommand('bun run --cwd packages/bruno-sqlite scripts/generate-artifacts.ts && bun run --cwd packages/bruno-sqlite rollup -c', 'Building bruno-sqlite');
+      execCommand('bun run --cwd packages/bruno-js ./src/sandbox/bundle-libraries.js', 'Bundling JS sandbox libraries');
+    } else {
+      execCommand('npm i --legacy-peer-deps', 'Installing dependencies');
+      forceInstallPlatformDeps();
 
-    // Bundle JS sandbox libraries
-    execCommand('npm run sandbox:bundle-libraries --workspace=packages/bruno-js', 'Bundling JS sandbox libraries');
+      // Build packages
+      execCommand('npm run build:graphql-docs', 'Building graphql-docs');
+      execCommand('npm run build:bruno-query', 'Building bruno-query');
+      execCommand('npm run build:bruno-common', 'Building bruno-common');
+      execCommand('npm run build:bruno-converters', 'Building bruno-converters');
+      execCommand('npm run build:bruno-requests', 'Building bruno-requests');
+      execCommand('npm run build:schema-types', 'Building schema-types');
+      execCommand('npm run build:bruno-filestore', 'Building bruno-filestore');
+      execCommand('npm run build:bruno-sqlite', 'Building bruno-sqlite');
+
+      // Bundle JS sandbox libraries
+      execCommand('npm run sandbox:bundle-libraries --workspace=packages/bruno-js', 'Bundling JS sandbox libraries');
+    }
 
     console.log(`\n${icons.success} Setup completed successfully!\n`);
   } catch (error) {

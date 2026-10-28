@@ -90,9 +90,9 @@ const Wrapper = styled.div`
 
     .bruno-text {
       font-size: 13px;
-      font-weight: 600;
+      font-weight: 700;
       color: ${(props) => props.theme.text};
-      letter-spacing: 0.5px;
+      letter-spacing: 0.6px;
     }
   }
 

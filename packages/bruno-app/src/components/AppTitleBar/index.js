@@ -295,10 +295,10 @@ const AppTitleBar = () => {
           </MenuDropdown>
         </div>
 
-        {/* Center section: Bruno logo + text */}
+        {/* Center section: NgaRingApi logo + text */}
         <div className="titlebar-center">
-          <Bruno width={18} />
-          <span className="bruno-text">Bruno</span>
+          <Bruno width={20} />
+          <span className="bruno-text">NgaRingApi</span>
         </div>
 
         {/* Right section: Action buttons */}

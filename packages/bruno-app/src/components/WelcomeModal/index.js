@@ -107,11 +107,11 @@ const WelcomeModal = ({ onDismiss, onImportCollection, onCreateCollection, onOpe
             <Bruno width={48} />
           </div>
           <h1 className="welcome-heading">
-            {step === 1 ? 'Welcome to Bruno' : step === 4 ? 'Ready to go!' : 'Set up Bruno'}
+            {step === 1 ? 'Welcome to NgaRingApi' : step === 4 ? 'Ready to go!' : 'Set up NgaRingApi'}
           </h1>
           {step === 1 && (
             <p className="welcome-tagline">
-              A fast, Git-friendly, and open-source API client.
+              A fast, Git-friendly, and local-first API IDE.
             </p>
           )}
         </div>

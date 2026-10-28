@@ -1,5 +1,6 @@
 const { spawn } = require('child_process');
 const path = require('path');
+const http = require('http');
 
 // ANSI color codes
 const colors = {
@@ -28,36 +29,57 @@ const electronDir = path.join(rootDir, 'packages/bruno-electron');
 
 let electronProcess = null;
 let detectedPort = null;
+let electronStarted = false;
+
+// ANSI stripper to reliably parse terminal output containing colors
+const stripAnsi = (str) => str.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '');
 
 // Regex to match rsbuild's local URL output (e.g., "➜ Local:    http://localhost:3000/")
-const portRegex = /Local:\s+http:\/\/localhost:(\d+)/;
+const portRegex = /Local:\s*http:\/\/localhost:(\d+)/i;
 
 console.log(`\n${colors.bright}${colors.yellow}🚀 Starting Bruno development environment...${colors.reset}\n`);
 
+const pkgManager = 'bun';
+
 // Start the rsbuild dev server
-const webProcess = spawn('npm', ['run', 'dev'], {
+const webProcess = spawn(pkgManager, ['run', 'dev'], {
   cwd: webDir,
   stdio: ['inherit', 'pipe', 'pipe'],
   shell: true
 });
 
-webProcess.stdout.on('data', (data) => {
+function handleOutput(data) {
   const output = data.toString();
-  process.stdout.write(output);
+  const clean = stripAnsi(output);
+
+  // If compilation finished, immediately launch Electron
+  if (clean.includes('ready') && (clean.includes('built in') || clean.includes('ready in'))) {
+    tryLaunchElectron(detectedPort || 3000);
+    return;
+  }
 
   // Try to detect the port from rsbuild output
   if (!detectedPort) {
-    const match = output.match(portRegex);
+    const match = clean.match(portRegex) || clean.match(/localhost:(\d+)/i);
     if (match) {
       detectedPort = match[1];
       log.success(`Detected dev server on port ${colors.bright}${detectedPort}${colors.reset}`);
-      startElectron(detectedPort);
+      log.info(`Waiting for React bundle to finish building before launching Electron...`);
+      waitForServer(detectedPort, () => {
+        tryLaunchElectron(detectedPort);
+      });
     }
   }
+}
+
+webProcess.stdout.on('data', (data) => {
+  process.stdout.write(data.toString());
+  handleOutput(data);
 });
 
 webProcess.stderr.on('data', (data) => {
   process.stderr.write(data.toString());
+  handleOutput(data);
 });
 
 webProcess.on('close', (code) => {
@@ -65,10 +87,57 @@ webProcess.on('close', (code) => {
   cleanup();
 });
 
+function tryLaunchElectron(port) {
+  if (electronStarted) return;
+  electronStarted = true;
+  if (pollInterval) clearInterval(pollInterval);
+  log.success(`Dev server is ready! Launching Electron...`);
+  startElectron(port);
+}
+
+// Proactive poll timer: checks whether dev server is responsive even before/if output regex fires
+const pollInterval = setInterval(() => {
+  if (electronStarted) {
+    clearInterval(pollInterval);
+    return;
+  }
+  const portsToTry = detectedPort ? [detectedPort] : [3000, 3001];
+  for (const port of portsToTry) {
+    const req = http.get(`http://localhost:${port}`, (res) => {
+      if (!electronStarted && res.statusCode) {
+        tryLaunchElectron(port);
+      }
+    });
+    req.on('error', () => {});
+    req.setTimeout(600, () => req.destroy());
+  }
+}, 800);
+
+function waitForServer(port, callback) {
+  let done = false;
+  const check = () => {
+    if (done || electronStarted) return;
+    const req = http.get(`http://localhost:${port}`, (res) => {
+      if (!done && !electronStarted && res.statusCode) {
+        done = true;
+        callback();
+      }
+    });
+    req.on('error', () => {
+      if (!done && !electronStarted) setTimeout(check, 500);
+    });
+    req.setTimeout(1000, () => {
+      req.destroy();
+      if (!done && !electronStarted) setTimeout(check, 500);
+    });
+  };
+  check();
+}
+
 function startElectron(port) {
   log.info(`Starting Electron with ${colors.cyan}BRUNO_DEV_PORT=${port}${colors.reset}`);
 
-  electronProcess = spawn('npm', ['run', 'dev'], {
+  electronProcess = spawn(pkgManager, ['run', 'dev'], {
     cwd: electronDir,
     stdio: 'inherit',
     shell: true,
@@ -85,6 +154,7 @@ function startElectron(port) {
 }
 
 function cleanup() {
+  if (pollInterval) clearInterval(pollInterval);
   if (webProcess && !webProcess.killed) {
     webProcess.kill();
   }

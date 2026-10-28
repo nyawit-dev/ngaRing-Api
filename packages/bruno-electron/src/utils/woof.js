@@ -8,16 +8,16 @@ const easterEggResponse = (request) => {
     '   /,    /`',
     '   \\\\"--\\\\',
     '',
-    'Bruno fetched your request. Good human.'
+    '⚡ NgaRingApi executed your request at light speed.'
   ].join('\n');
   const buffer = Buffer.from(body, 'utf-8');
   return {
     status: 200,
-    statusText: 'Woof!',
+    statusText: 'Ring Connected!',
     headers: {
       'content-type': 'text/plain; charset=utf-8',
-      'x-good-boy': 'true',
-      'x-fetched-by': 'bruno'
+      'x-engine': 'ngaringapi',
+      'x-fetched-by': 'ngaringapi'
     },
     data: body,
     dataBuffer: buffer.toString('base64'),

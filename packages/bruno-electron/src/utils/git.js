@@ -448,17 +448,15 @@ const checkoutRemoteGitBranch = async (win, { gitRootPath, remoteName, branchNam
   });
 };
 
-const getCollectionGitLogs = async (gitRootPath) => {
+const getCollectionGitLogs = async (gitRootPath, limit = 50, skip = 0) => {
   const git = getSimpleGitInstanceForPath(gitRootPath);
 
   try {
-    // Get logs with shortstat for file change info
-    const result = await git.raw([
-      'log',
-      '--format=%H|%s|%an|%aI',
-      '--shortstat',
-      '-n', '500'
-    ]);
+    const args = ['log', '--format=%H|%s|%an|%aI', '--shortstat', '-n', String(limit)];
+    if (skip > 0) {
+      args.push('--skip', String(skip));
+    }
+    const result = await git.raw(args);
 
     if (!result || !result.trim()) {
       return [];
@@ -697,7 +695,8 @@ const getCollectionGitData = async (gitRootPath, collectionPath) => {
     getCollectionGitRepoUrl(gitRootPath)
   ]);
 
-  const logs = branches.length ? await getCollectionGitLogs(gitRootPath) : [];
+  // Fast fetch: retrieve top 20 commits for initial summary to keep status checks sub-50ms
+  const logs = branches.length ? await getCollectionGitLogs(gitRootPath, 20) : [];
 
   return {
     gitRootPath,
@@ -707,6 +706,19 @@ const getCollectionGitData = async (gitRootPath, collectionPath) => {
     defaultGitBranch,
     logs
   };
+};
+
+const deleteBranch = async (gitRootPath, branchName, force = false) => {
+  return new Promise((resolve, reject) => {
+    const git = getSimpleGitInstanceForPath(gitRootPath);
+    git.branch([force ? '-D' : '-d', branchName], (err, res) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(res);
+    });
+  });
 };
 
 const cloneGitRepository = async (win, data) => {
@@ -815,8 +827,13 @@ const addRemote = ({ gitRootPath, remoteName, remoteUrl }) => {
   return new Promise(async (resolve, reject) => {
     try {
       const git = getSimpleGitInstanceForPath(gitRootPath);
-      console.log('Adding remote:', { gitRootPath, remoteName, remoteUrl });
-      await git.addRemote(remoteName, remoteUrl);
+      const existingRemotes = await fetchRemotes(gitRootPath).catch(() => []);
+      const exists = existingRemotes.some((r) => r.name === remoteName);
+      if (exists) {
+        await git.remote(['set-url', remoteName, remoteUrl]);
+      } else {
+        await git.addRemote(remoteName, remoteUrl);
+      }
       const remotes = await fetchRemotes(gitRootPath);
       resolve(remotes);
     } catch (err) {
@@ -1858,5 +1875,6 @@ module.exports = {
   getFileContentAtCommit,
   getFileContentForVisualDiff,
   getWorkingFileContentForVisualDiff,
-  getStashFileContentForVisualDiff
+  getStashFileContentForVisualDiff,
+  deleteBranch
 };

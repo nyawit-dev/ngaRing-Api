@@ -3,8 +3,8 @@ require('dotenv').config({ path: process.env.DOTENV_PATH });
 const isBenchmark = process.env.BRUNO_BENCHMARK === 'true';
 
 const config = {
-  appId: 'com.usebruno.app',
-  productName: isBenchmark ? 'Bruno Benchmark' : 'Bruno',
+  appId: 'com.ngaringapi.app',
+  productName: isBenchmark ? 'NgaRingApi Benchmark' : 'NgaRingApi',
   extraMetadata: {
     brunoBuild: {
       benchmark: isBenchmark,
@@ -12,6 +12,7 @@ const config = {
     }
   },
   electronVersion: '37.6.1',
+  npmRebuild: false,
   directories: {
     buildResources: 'resources',
     output: 'out'

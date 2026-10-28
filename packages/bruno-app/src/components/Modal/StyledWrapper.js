@@ -39,28 +39,38 @@ const Wrapper = styled.div`
     flex-direction: column;
     will-change: opacity, transform;
     flex-grow: 0;
-    margin: 3vh 10vw;
-    margin-top: 50px;
+    margin: clamp(16px, 3vh, 40px) auto;
+    margin-top: clamp(24px, 5vh, 50px);
     border: 1px solid ${(props) => props.theme.border.border0};
+    width: 92vw;
+    box-sizing: border-box;
 
     &.modal-sm {
-      min-width: 300px;
-      max-width: 500px;
+      max-width: 460px;
+      min-width: min(100%, 300px);
     }
 
     &.modal-md {
-      min-width: 500px;
-      max-width: 800px;
+      max-width: 680px;
+      min-width: min(100%, 360px);
     }
 
     &.modal-lg {
-      min-width: 800px;
-      max-width: 1140px;
+      max-width: 960px;
+      min-width: min(100%, 480px);
     }
 
     &.modal-xl {
-      min-width: 1140px;
-      max-width: calc(100% - 30px);
+      max-width: 1240px;
+      width: clamp(320px, 94vw, 1240px);
+      min-width: min(100%, 320px);
+    }
+
+    @media (max-width: 768px) {
+      margin: 12px auto;
+      margin-top: 16px;
+      width: calc(100vw - 20px) !important;
+      max-width: calc(100vw - 20px) !important;
     }
 
     animation: fade-and-slide-in-from-top 0.5s forwards cubic-bezier(0.19, 1, 0.22, 1);

@@ -260,7 +260,7 @@ app.on('ready', async () => {
       preload: path.join(__dirname, 'preload.js'),
       webviewTag: true
     },
-    title: 'Bruno',
+    title: 'NgaRingApi',
     icon: path.join(__dirname, 'about/256x256.png'),
     titleBarStyle: isMac ? 'hiddenInset' : isWindows ? 'hidden' : undefined,
     frame: isLinux ? false : true,
@@ -379,21 +379,22 @@ app.on('ready', async () => {
         slashes: true
       });
 
-  mainWindow.loadURL(url).catch((reason) => {
-    console.error(`Error: Failed to load URL: "${url}" (Electron shows a blank screen because of this).`);
-    console.error('Original message:', reason);
-    if (isDev) {
-      console.error(
-        'Could not connect to Next.Js dev server, is it running?'
-        + ' Start the dev server using "npm run dev:web" and restart electron'
-      );
-    } else {
-      console.error(
-        'If you are using an official production build: the above error is most likely a bug! '
-        + ' Please report this under: https://github.com/usebruno/bruno/issues'
-      );
-    }
-  });
+  const loadAppURL = () => {
+    mainWindow.loadURL(url).catch((reason) => {
+      console.error(`Error: Failed to load URL: "${url}" (Electron shows a blank screen because of this).`);
+      console.error('Original message:', reason);
+      if (isDev) {
+        console.log('Dev server not ready yet. Retrying in 2s...');
+        setTimeout(loadAppURL, 2000);
+      } else {
+        console.error(
+          'If you are using an official production build: the above error is most likely a bug! '
+          + ' Please report this under: https://github.com/usebruno/bruno/issues'
+        );
+      }
+    });
+  };
+  loadAppURL();
 
   let boundsTimeout;
   const handleBoundsChange = () => {

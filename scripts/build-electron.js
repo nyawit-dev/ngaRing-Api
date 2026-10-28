@@ -1,7 +1,6 @@
 const os = require('os');
 const fs = require('fs-extra');
-const util = require('util');
-const spawn = util.promisify(require('child_process').spawn);
+const { spawn } = require('child_process');
 const path = require('path');
 
 async function deleteFileIfExists(filePath) {
@@ -48,8 +47,8 @@ async function removeSourceMapFiles(directory) {
 }
 
 async function execCommandWithOutput(command) {
-  return new Promise(async (resolve, reject) => {
-    const childProcess = await spawn(command, {
+  return new Promise((resolve, reject) => {
+    const childProcess = spawn(command, {
       stdio: 'inherit',
       shell: true
     });
@@ -123,7 +122,11 @@ async function main() {
       osArg = 'linux';
     }
 
-    await execCommandWithOutput(`npm run dist:${osArg} --workspace=packages/bruno-electron`);
+    const isBun = typeof Bun !== 'undefined' || !!process.versions.bun;
+    const distCmd = isBun
+      ? `bun run --cwd packages/bruno-electron dist:${osArg}`
+      : `npm run dist:${osArg} --workspace=packages/bruno-electron`;
+    await execCommandWithOutput(distCmd);
   } catch (error) {
     console.error('An error occurred:', error);
   }

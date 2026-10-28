@@ -13,7 +13,7 @@
     "clean": "rimraf dist",
     "test": "node --experimental-vm-modules $(npx which jest) --colors --collectCoverage",
     "test:ci": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js --colors --collectCoverage",
-    "prebuild": "npm run clean",
+    "prebuild": "rimraf dist",
     "build": "rollup -c",
     "watch": "rollup -c -w",
     "prepack": "npm run test && npm run build"

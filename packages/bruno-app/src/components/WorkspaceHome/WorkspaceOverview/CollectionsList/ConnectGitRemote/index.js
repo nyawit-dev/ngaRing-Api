@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useDispatch, useSelector } from 'react-redux';
+import { IconBrandGit, IconLink } from '@tabler/icons';
 import toast from 'react-hot-toast';
 import Modal from 'components/Modal';
 import { isGitRepositoryUrl } from 'utils/git';
@@ -50,43 +51,45 @@ const ConnectGitRemote = ({ collectionPath, collectionName, initialUrl = '', onC
 
   return (
     <Modal size="md" title={title} confirmText={confirmText} handleConfirm={() => formik.handleSubmit()} handleCancel={onClose}>
-      <form className="bruno-form" onSubmit={(e) => e.preventDefault()}>
+      <form className="bruno-form w-full box-sizing: border-box" onSubmit={(e) => e.preventDefault()}>
         {collectionName ? (
-          <div className="text-sm text-muted mb-3 leading-relaxed break-words space-y-2">
-            <p className="m-0">
-              Linking{' '}
-              <span className="font-medium text-inherit break-words" title={collectionName}>
-                {collectionName}
-              </span>{' '}
-              to a remote Git repository.
-            </p>
-            <p className="m-0">
-              The URL is saved in <span className="font-mono">workspace.yml</span> only. Your collection files on disk are not
-              modified.
+          <div className="text-xs sm:text-sm text-muted mb-4 leading-relaxed break-words space-y-2 p-3 bg-gray-800/40 rounded border border-gray-700/50">
+            <div className="flex items-center gap-2 font-semibold text-gray-200">
+              <IconBrandGit size={18} className="text-yellow-500 flex-shrink-0" />
+              <span className="truncate">{collectionName}</span>
+            </div>
+            <p className="m-0 text-gray-400 text-xs">
+              Menghubungkan koleksi ini ke remote Git repository. URL akan disimpan di <span className="font-mono text-gray-300">workspace.yml</span>.
             </p>
           </div>
         ) : null}
         <div>
-          <label htmlFor="remoteUrl" className="block font-medium">
+          <label htmlFor="remoteUrl" className="block text-xs font-semibold text-gray-300 mb-1">
             Git Remote URL
           </label>
-          <input
-            id="remoteUrl"
-            type="text"
-            name="remoteUrl"
-            ref={inputRef}
-            className="block textbox mt-2 w-full"
-            placeholder="https://github.com/owner/repo"
-            autoComplete="off"
-            autoCorrect="off"
-            autoCapitalize="off"
-            spellCheck="false"
-            onChange={formik.handleChange}
-            value={formik.values.remoteUrl || ''}
-          />
+          <div className="relative">
+            <input
+              id="remoteUrl"
+              type="text"
+              name="remoteUrl"
+              ref={inputRef}
+              className="block textbox w-full text-xs font-mono px-3 py-2 bg-gray-800 border border-gray-700 rounded text-white focus:outline-none focus:border-yellow-500"
+              placeholder="https://github.com/owner/repository.git"
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck="false"
+              onChange={formik.handleChange}
+              value={formik.values.remoteUrl || ''}
+            />
+          </div>
           {formik.touched.remoteUrl && formik.errors.remoteUrl ? (
-            <div className="text-red-500">{formik.errors.remoteUrl}</div>
-          ) : null}
+            <div className="text-red-400 text-xs mt-1">{formik.errors.remoteUrl}</div>
+          ) : (
+            <div className="text-[11px] text-gray-500 mt-1.5">
+              Mendukung URL Git HTTPS (misal: https://github.com/org/repo.git) atau SSH.
+            </div>
+          )}
         </div>
       </form>
     </Modal>
