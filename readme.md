@@ -1,229 +1,125 @@
-<br />
-<img src="assets/images/logo.png" width="80"/>
+<p align="center">
+  <img src="assets/images/logo.png" width="96" alt="NgaRingApi Logo" />
+</p>
 
-### NgaRingApi - Fast, Local-First IDE for Exploring and Testing APIs.
+<h1 align="center">NgaRingApi</h1>
 
-[![GitHub version](https://badge.fury.io/gh/usebruno%2Fbruno.svg)](https://badge.fury.io/gh/usebruno%2Fbruno)
-[![CI](https://github.com/usebruno/bruno/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/usebruno/bruno/actions/workflows/tests.yml)
-[![Commit Activity](https://img.shields.io/github/commit-activity/m/usebruno/bruno)](https://github.com/usebruno/bruno/pulse)
-[![X](https://img.shields.io/twitter/follow/use_bruno?style=social&logo=x)](https://twitter.com/use_bruno)
-[![Website](https://img.shields.io/badge/Website-Visit-blue)](https://www.usebruno.com)
-[![Download](https://img.shields.io/badge/Download-Latest-brightgreen)](https://www.usebruno.com/downloads)
+<p align="center">
+  <strong>Fast, Local-First API IDE and Testing Environment</strong><br>
+  Built for developers who value data privacy, Git collaboration, and raw performance.
+</p>
 
-**English**
-| [Українська](docs/readme/readme_ua.md)
-| [Русский](docs/readme/readme_ru.md)
-| [Türkçe](docs/readme/readme_tr.md)
-| [Deutsch](docs/readme/readme_de.md)
-| [Français](docs/readme/readme_fr.md)
-| [Português (BR)](docs/readme/readme_pt_br.md)
-| [한국어](docs/readme/readme_kr.md)
-| [বাংলা](docs/readme/readme_bn.md)
-| [Español](docs/readme/readme_es.md)
-| [Italiano](docs/readme/readme_it.md)
-| [Română](docs/readme/readme_ro.md)
-| [Polski](docs/readme/readme_pl.md)
-| [简体中文](docs/readme/readme_cn.md)
-| [正體中文](docs/readme/readme_zhtw.md)
-| [العربية](docs/readme/readme_ar.md)
-| [日本語](docs/readme/readme_ja.md)
-| [ქართული](docs/readme/readme_ka.md)
-| [Nederlands](docs/readme/readme_nl.md)
-| [فارسی](docs/readme/readme_fa.md)
-| [हिन्दी](docs/readme/readme_hi.md)
+<p align="center">
+  <a href="license.md"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
+  <img src="https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-brightgreen.svg" alt="Platforms">
+  <img src="https://img.shields.io/badge/Local--First-100%25-cyan.svg" alt="Local First">
+  <img src="https://img.shields.io/badge/Git--Native-Enabled-orange.svg" alt="Git Native">
+</p>
 
-Bruno is a new and innovative API client, aimed at revolutionizing the status quo represented by Postman and similar tools out there.
+---
 
-Bruno stores your collections directly in a folder on your filesystem. We use a plain text markup language, Bru, to save information about API requests.
+## Overview
 
-You can use Git or any version control of your choice to collaborate over your API collections.
+**NgaRingApi** is a modern, developer-centric API client and IDE designed to replace bloated cloud-based tools. 
 
-Bruno is offline-only. There are no plans to add cloud-sync to Bruno, ever. We value your data privacy and believe it should stay on your device. Read our long-term vision [here](https://github.com/usebruno/bruno/discussions/269)
+Instead of storing your sensitive API requests, credentials, and test suites in a remote vendor database, NgaRingApi saves your collections directly on your local filesystem using plain-text files.
 
-[Download Bruno](https://www.usebruno.com/downloads)
+### Why NgaRingApi?
 
-📢 Watch our recent talk at India FOSS 3.0 Conference [here](https://www.youtube.com/watch?v=7bSMFpbcPiY)
+- **Local-First Architecture:** Your collections, environment variables, and request data reside on your disk. NgaRingApi functions completely offline.
+- **Native Git Collaboration:** Every request is a readable file. Commit, create pull requests, review diffs, and resolve merge conflicts using your existing Git workflow.
+- **Fast & Snappy:** Built with Rsbuild and modern React for instant startup and rapid response rendering.
+- **Zero Cloud Lock-in:** No forced account creation, no tracking telemetry of your payloads, and no subscription walls for core features.
+- **Multi-Protocol Support:** Seamlessly test REST, GraphQL, gRPC, and WebSocket APIs in one unified workspace.
 
-![bruno](assets/images/landing-2-dark.png#gh-light-mode-only)
-![bruno](assets/images/landing-2-light.png#gh-dark-mode-only) <br /><br />
+---
 
-## Commercial Versions ✨
+## Core Capabilities
 
-Majority of our features are free and open source.
-We strive to strike a harmonious balance between [open-source principles and sustainability](https://github.com/usebruno/bruno/discussions/269)
+| Feature | Description |
+| :--- | :--- |
+| **Request Builder** | Comprehensive support for URL parameters, custom headers, body types (JSON, XML, Form-Data, Binary, Raw). |
+| **Response Inspector** | Syntax-highlighted viewer with search, formatted JSON tree, response headers, status codes, and latency metrics. |
+| **Environment Management** | Multi-environment support with secret masking, inheritance, and dynamic variable interpolation. |
+| **Automated Testing** | Write pre-request scripts and assertions with a built-in test runner using familiar JavaScript syntax. |
+| **Collection Runner** | Run batches of requests sequentially with configurable iterations and detailed reporting. |
+| **Design System** | Tailored dark and light themes featuring high-contrast Cyber-Cyan and Ocean-Teal palettes. |
 
-You can explore our [paid versions](https://www.usebruno.com/pricing) to see if there are additional features that you or your team may find useful! <br/>
+---
 
-## Table of Contents
+## Getting Started
 
-- [Installation](#installation)
-- [Bruno CLI](#bruno-cli)
-- [Run with Docker](#run-with-docker)
-- [Features](#features)
-  - [Run across multiple platforms 🖥️](#run-across-multiple-platforms-%EF%B8%8F)
-  - [Collaborate via Git 👩‍💻🧑‍💻](#collaborate-via-git-%E2%80%8D%E2%80%8D)
-- [Important Links 📌](#important-links-)
-- [Showcase 🎥](#showcase-)
-- [Share Testimonials 📣](#share-testimonials-)
-- [Publishing to New Package Managers](#publishing-to-new-package-managers)
-- [Stay in touch 🌐](#stay-in-touch-)
-- [Trademark](#trademark)
-- [Contribute 👩‍💻🧑‍💻](#contribute-%E2%80%8D%E2%80%8D)
-- [Authors](#authors)
-- [License 📄](#license-)
+### Prerequisites
 
-## Installation
+- [Bun](https://bun.sh/) (v1.1+ recommended) or [Node.js](https://nodejs.org/) (v20+ LTS)
+- [Git](https://git-scm.com/)
 
-Bruno is available as binary download [on our website](https://www.usebruno.com/downloads) for Mac, Windows and Linux.
+### Installation from Source
 
-You can also install Bruno via package managers like Homebrew, Chocolatey, Scoop, Snap, Flatpak and Apt.
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/nyawit-dev/ngaRing-Api.git
+   cd ngaRing-Api
+   ```
 
-```sh
-# On Mac via Homebrew
-brew install bruno
+2. **Install dependencies:**
+   ```bash
+   bun run setup
+   ```
 
-# On Windows via Chocolatey
-choco install bruno
+3. **Start the development application:**
+   - **Desktop (Electron):**
+     ```bash
+     bun run dev
+     ```
+   - **Web Browser Interface:**
+     ```bash
+     bun run dev:web
+     ```
 
-# On Windows via Scoop
-scoop bucket add extras
-scoop install bruno
+---
 
-# On Windows via winget
-winget install Bruno.Bruno
+## Building Desktop Packages
 
-# On Linux via Snap
-snap install bruno
+NgaRingApi can be compiled into standalone native packages for Windows, macOS, and Linux:
 
-# On Linux via Flatpak
-flatpak install com.usebruno.Bruno
+```bash
+# Production Web Build
+bun run build:web
 
-# On Arch Linux via AUR
-yay -S bruno
+# Windows Installer (.exe)
+bun run build:electron:win
 
-# On Linux via Apt
-sudo mkdir -p /etc/apt/keyrings
-sudo apt update && sudo apt install gpg curl
-curl -fsSL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x9FA6017ECABE0266" \
-  | gpg --dearmor \
-  | sudo tee /etc/apt/keyrings/bruno.gpg > /dev/null
-sudo chmod 644 /etc/apt/keyrings/bruno.gpg
-echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/bruno.gpg] http://debian.usebruno.com/ bruno stable" \
-  | sudo tee /etc/apt/sources.list.d/bruno.list
-sudo apt update && sudo apt install bruno
+# macOS Installer (.dmg / .pkg)
+bun run build:electron:mac
+
+# Linux Package (.AppImage / .deb)
+bun run build:electron:linux
 ```
 
-## Bruno CLI
+Packaged installers will be generated inside the `packages/bruno-electron/out` directory.
 
-The **Bruno CLI** lets you run your API collections from the command line, which is ideal for automated testing and CI/CD pipelines. Install it from npm using the package manager of your choice:
+---
 
-```sh
-npm install -g @usebruno/cli
+## Project Structure
+
+```text
+├── assets/                  # Application icons, branding, and imagery
+├── packages/
+│   ├── bruno-app/           # Core React frontend interface and IDE panels
+│   ├── bruno-electron/      # Electron main process, window management, and native shell
+│   ├── bruno-common/        # Shared utility functions and common data structures
+│   ├── bruno-filestore/     # Local disk storage and collection persistence engine
+│   ├── bruno-requests/      # Network dispatchers (HTTP, HTTPS, gRPC, WS)
+│   ├── bruno-schema/        # Validation schemas for requests and environments
+│   └── bruno-lang/          # Language parsers and serializers
+└── DESIGN.md                # Design system specification and token guidelines
 ```
 
-Navigate to the directory containing your collection and run it:
+---
 
-```sh
-# Run every request in the collection
-bru run
+## License & Attribution
 
-# Run a single request
-bru run request.bru
+**NgaRingApi** is distributed under the [MIT License](license.md).
 
-# Run a folder against a specific environment
-bru run folder --env Local
-```
-
-For the full command reference, see the [Bruno CLI documentation](https://docs.usebruno.com/bru-cli/overview).
-
-## Run with Docker
-
-Official Docker images for the **Bruno CLI** let you run API collections in CI/CD pipelines and locally without installing Node.js or npm on the host. Images are published to both [Docker Hub](https://hub.docker.com/r/usebruno/cli) and the [GitHub Container Registry](https://ghcr.io/usebruno/cli) on every CLI release, with `alpine` and `debian` variants for `linux/amd64` and `linux/arm64`.
-
-```sh
-# Pull from Docker Hub
-docker pull usebruno/cli:latest
-
-# Or pull from the GitHub Container Registry
-docker pull ghcr.io/usebruno/cli:latest
-
-# Run a collection by mounting the current directory
-docker run -v $(pwd):/bruno usebruno/cli run
-```
-
-For variants, tag matrix, environment files, and CI examples (GitHub Actions, GitLab CI, Jenkins), see the full [Bruno CLI Docker documentation](https://docs.usebruno.com/bru-cli/docker).
-
-## Features
-
-### Run across multiple platforms 🖥️
-
-![bruno](assets/images/run-anywhere.png) <br /><br />
-
-### Collaborate via Git 👩‍💻🧑‍💻
-
-Or any version control system of your choice
-
-![bruno](assets/images/version-control.png) <br /><br />
-
-## Important Links 📌
-
-- [Our Long Term Vision](https://github.com/usebruno/bruno/discussions/269)
-- [Roadmap](https://www.usebruno.com/roadmap)
-- [Documentation](https://docs.usebruno.com)
-- [Stack Overflow](https://stackoverflow.com/questions/tagged/bruno)
-- [Website](https://www.usebruno.com)
-- [Pricing](https://www.usebruno.com/pricing)
-- [Download](https://www.usebruno.com/downloads)
-
-## Showcase 🎥
-
-- [Testimonials](https://github.com/usebruno/bruno/discussions/343)
-- [Knowledge Hub](https://github.com/usebruno/bruno/discussions/386)
-- [Scriptmania](https://github.com/usebruno/bruno/discussions/385)
-
-## Share Testimonials 📣
-
-If Bruno has helped you at work and your teams, please don't forget to share your [testimonials on our GitHub discussion](https://github.com/usebruno/bruno/discussions/343)
-
-## Publishing to New Package Managers
-
-Please see [here](publishing.md) for more information.
-
-## Stay in touch 🌐
-
-[𝕏 (Twitter)](https://twitter.com/use_bruno) <br />
-[Website](https://www.usebruno.com) <br />
-[Discord](https://discord.com/invite/KgcZUncpjq) <br />
-[LinkedIn](https://www.linkedin.com/company/usebruno)
-
-## Trademark
-
-**Name**
-
-`Bruno` is a trademark held by [Anoop M D](https://www.helloanoop.com/)
-
-**Logo**
-
-The logo is sourced from [OpenMoji](https://openmoji.org/library/emoji-1F436/). License: CC [BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)
-
-## Contribute 👩‍💻🧑‍💻
-
-I am happy that you are looking to improve bruno. Please check out the [contributing guide](contributing.md)
-
-Even if you are not able to make contributions via code, please don't hesitate to file bugs and feature requests that needs to be implemented to solve your use case.
-
-## Authors
-
-<div align="center">
-    <a href="https://github.com/usebruno/bruno/graphs/contributors">
-        <img src="https://contrib.rocks/image?repo=usebruno/bruno" />
-    </a>
-</div>
-
-## Acknowledgements & Tribute 🙏
-
-**NgaRingApi** is a customized derivative work and tribute to [Bruno](https://github.com/usebruno/bruno), originally created by [Anoop M D](https://www.helloanoop.com/) and contributors under the [MIT License](license.md). We honor and deeply appreciate the Bruno open-source team for their foundational work in offline, local-first API tooling.
-
-## License 📄
-
-[MIT](license.md)
+This project is built upon the open-source foundation of Bruno, created by Anoop M D and contributors under the MIT License. We gratefully acknowledge the original authors and the open-source community for pioneering local-first API tooling.

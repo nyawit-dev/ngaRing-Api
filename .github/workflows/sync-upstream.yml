@@ -1,0 +1,63 @@
+name: Sync Upstream (Bruno Updates)
+
+on:
+  schedule:
+    # Run every Sunday at 00:00 UTC
+    - cron: '0 0 * * 0'
+  workflow_dispatch: # Allows manual trigger from GitHub Actions UI
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    name: Sync Upstream Bruno Updates
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Add upstream remote
+        run: |
+          git remote add upstream https://github.com/usebruno/bruno.git || true
+          git fetch upstream main
+
+      - name: Check for new upstream commits
+        id: check_upstream
+        run: |
+          COMMITS_BEHIND=$(git rev-list --count HEAD..upstream/main)
+          echo "Commits behind upstream: $COMMITS_BEHIND"
+          if [ "$COMMITS_BEHIND" -eq 0 ]; then
+            echo "has_updates=false" >> $GITHUB_OUTPUT
+            echo "Already up to date with upstream/main."
+          else
+            echo "has_updates=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Attempt Fast/Clean Merge
+        if: steps.check_upstream.outputs.has_updates == 'true'
+        id: merge
+        run: |
+          # Try merging upstream/main with standard merge
+          if git merge upstream/main -m "chore(sync): automated sync from upstream Bruno [skip ci]"; then
+            echo "merge_status=success" >> $GITHUB_OUTPUT
+            git push origin main
+            echo "Successfully merged and pushed upstream updates."
+          else
+            echo "merge_status=conflict" >> $GITHUB_OUTPUT
+            echo "Conflict detected; creating sync PR branch instead."
+            git merge --abort || true
+            git checkout -b sync/upstream-updates
+            git merge upstream/main -X ours -m "chore(sync): automated merge from upstream Bruno with conflicts resolved" || true
+            git push -u origin sync/upstream-updates --force
+          fi
