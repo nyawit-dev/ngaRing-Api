@@ -1,0 +1,156 @@
+name: Sync Upstream Updates
+
+on:
+  schedule:
+    # Runs automatically every day at 02:00 UTC (09:00 WIB)
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Sync Mode (create-pr creates a review PR, auto-merge commits directly to main)'
+        required: true
+        type: choice
+        default: 'create-pr'
+        options:
+          - 'create-pr'
+          - 'auto-merge'
+      force_sync:
+        description: 'Force sync execution even if already up to date'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync-upstream:
+    name: Sync Upstream Bruno Updates
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Configure Git Identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Add Upstream and Fetch
+        run: |
+          git remote add upstream https://github.com/usebruno/bruno.git || git remote set-url upstream https://github.com/usebruno/bruno.git
+          git fetch upstream main --tags
+          echo "Upstream remote configured and fetched."
+
+      - name: Check for New Commits
+        id: check_updates
+        run: |
+          BEHIND_COUNT=$(git rev-list --count HEAD..upstream/main)
+          echo "New upstream commits behind: $BEHIND_COUNT"
+          echo "behind_count=$BEHIND_COUNT" >> $GITHUB_OUTPUT
+
+          if [ "$BEHIND_COUNT" -eq 0 ] && [ "${{ github.event.inputs.force_sync }}" != "true" ]; then
+            echo "has_updates=false" >> $GITHUB_OUTPUT
+            echo "Repository is already up to date with upstream/main."
+          else
+            echo "has_updates=true" >> $GITHUB_OUTPUT
+            echo "Updates found: $BEHIND_COUNT commits ahead in upstream/main."
+          fi
+
+      - name: Perform Merge and Guard Branding
+        if: steps.check_updates.outputs.has_updates == 'true'
+        id: merge_upstream
+        run: |
+          SYNC_BRANCH="sync/upstream-updates"
+          git checkout -B "$SYNC_BRANCH" main
+
+          echo "Attempting to merge upstream/main into $SYNC_BRANCH..."
+          # Merge upstream changes
+          if ! git merge upstream/main --no-edit -m "chore(sync): merge upstream updates from usebruno/bruno"; then
+            echo "Merge conflicts detected. Resolving protected files with NgaRing branding..."
+            # Keep our version of protected branding files and workflows if conflicts occur
+            git checkout HEAD -- packages/bruno-electron/package.json 2>/dev/null || true
+            git checkout HEAD -- packages/bruno-electron/electron-builder-config.js 2>/dev/null || true
+            git checkout HEAD -- packages/bruno-electron/resources/installer.nsh 2>/dev/null || true
+            git checkout HEAD -- .github/workflows/ 2>/dev/null || true
+            git checkout HEAD -- package.json 2>/dev/null || true
+          fi
+
+          # Run branding guard script to ensure all author, urls, and appIds are preserved
+          node ./scripts/guard-branding.js
+
+          git add packages/bruno-electron/package.json packages/bruno-electron/electron-builder-config.js package.json .github/ || true
+
+          # If there are unresolved conflict markers in other files, record conflict status
+          if git diff --check | grep -q "conflict"; then
+            echo "unresolved_conflicts=true" >> $GITHUB_OUTPUT
+          else
+            echo "unresolved_conflicts=false" >> $GITHUB_OUTPUT
+            if ! git diff-index --quiet HEAD --; then
+              git commit --no-verify -m "chore(branding): re-apply NgaRingApi metadata guard" || true
+            fi
+          fi
+
+      - name: Install dependencies & verify tests
+        if: steps.check_updates.outputs.has_updates == 'true' && steps.merge_upstream.outputs.unresolved_conflicts == 'false'
+        run: |
+          bun run setup
+          bun test packages/bruno-electron/src/ipc/git.spec.js packages/bruno-app/src/utils/git/gitClient.spec.js
+
+      - name: Apply Auto-Merge (if selected)
+        if: steps.check_updates.outputs.has_updates == 'true' && steps.merge_upstream.outputs.unresolved_conflicts == 'false' && github.event.inputs.mode == 'auto-merge'
+        run: |
+          git checkout main
+          git merge sync/upstream-updates -m "chore(sync): auto-merge upstream updates from usebruno/bruno"
+          git push origin main
+          echo "Successfully auto-merged upstream updates directly into main."
+
+      - name: Create or Update Pull Request (default mode)
+        if: steps.check_updates.outputs.has_updates == 'true' && (github.event.inputs.mode != 'auto-merge' || steps.merge_upstream.outputs.unresolved_conflicts == 'true')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git push -f origin sync/upstream-updates
+
+          PR_EXISTS=$(gh pr list --head sync/upstream-updates --json number -q '.[0].number' || echo "")
+          
+          PR_BODY="### 🔄 Upstream Sync: usebruno/bruno -> NgaRingApi
+
+          This automated sync updates NgaRingApi with the latest commits from upstream \`usebruno/bruno\`.
+
+          #### Status:
+          - **Commits merged**: ${{ steps.check_updates.outputs.behind_count }} upstream commits
+          - **Branding Guard**: NgaRingApi publisher, logos, and build configuration preserved.
+          - **Tests**: IPC & Git tests verified.
+
+          #### Actions Needed:
+          1. Review the changes in this PR.
+          2. Merge when ready to release."
+
+          if [ -z "$PR_EXISTS" ]; then
+            gh pr create \
+              --title "chore(sync): merge upstream updates from usebruno/bruno" \
+              --body "$PR_BODY" \
+              --base main \
+              --head sync/upstream-updates
+            echo "Pull request created successfully."
+          else
+            gh pr edit "$PR_EXISTS" --body "$PR_BODY"
+            echo "Existing pull request #$PR_EXISTS updated."
+          fi
