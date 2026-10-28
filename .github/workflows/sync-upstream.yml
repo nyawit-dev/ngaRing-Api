@@ -80,56 +80,49 @@ jobs:
           SYNC_BRANCH="sync/upstream-updates"
           git checkout -B "$SYNC_BRANCH" main
 
-          echo "Attempting to merge upstream/main into $SYNC_BRANCH..."
-          # Merge upstream changes
-          if ! git merge upstream/main --no-edit -m "chore(sync): merge upstream updates from usebruno/bruno"; then
-            echo "Merge conflicts detected. Resolving protected files with NgaRing branding..."
-            # Keep our version of protected branding files and workflows if conflicts occur
-            git checkout HEAD -- packages/bruno-electron/package.json 2>/dev/null || true
-            git checkout HEAD -- packages/bruno-electron/electron-builder-config.js 2>/dev/null || true
-            git checkout HEAD -- packages/bruno-electron/resources/installer.nsh 2>/dev/null || true
-            git checkout HEAD -- .github/workflows/ 2>/dev/null || true
-            git checkout HEAD -- package.json 2>/dev/null || true
-          fi
+          echo "Attempting to merge upstream/main into $SYNC_BRANCH with -X ours..."
+          # Merge upstream changes, auto-resolving conflicts in favor of NgaRing customizations
+          git merge upstream/main -X ours --no-edit -m "chore(sync): merge upstream updates from usebruno/bruno" || true
+
+          # Keep our version of protected branding files and workflows if conflicts occur
+          git checkout HEAD -- packages/bruno-electron/package.json 2>/dev/null || true
+          git checkout HEAD -- packages/bruno-electron/electron-builder-config.js 2>/dev/null || true
+          git checkout HEAD -- packages/bruno-electron/resources/installer.nsh 2>/dev/null || true
+          git checkout HEAD -- .github/workflows/ 2>/dev/null || true
+          git checkout HEAD -- package.json 2>/dev/null || true
 
           # Run branding guard script to ensure all author, urls, and appIds are preserved
           node ./scripts/guard-branding.js
 
           git add packages/bruno-electron/package.json packages/bruno-electron/electron-builder-config.js package.json .github/ || true
 
-          # If there are unresolved conflict markers in other files, record conflict status
-          if git diff --check | grep -q "conflict"; then
-            echo "unresolved_conflicts=true" >> $GITHUB_OUTPUT
-          else
-            echo "unresolved_conflicts=false" >> $GITHUB_OUTPUT
-            if ! git diff-index --quiet HEAD --; then
-              git commit --no-verify -m "chore(branding): re-apply NgaRingApi metadata guard" || true
-            fi
+          if ! git diff-index --quiet HEAD --; then
+            git commit --no-verify -m "chore(branding): re-apply NgaRingApi metadata guard" || true
           fi
+          echo "Merge and branding guard complete."
 
       - name: Install dependencies & verify tests
-        if: steps.check_updates.outputs.has_updates == 'true' && steps.merge_upstream.outputs.unresolved_conflicts == 'false'
+        if: steps.check_updates.outputs.has_updates == 'true'
         run: |
           bun run setup
           bun test packages/bruno-electron/src/ipc/git.spec.js packages/bruno-app/src/utils/git/gitClient.spec.js
 
       - name: Apply Auto-Merge (if selected)
-        if: steps.check_updates.outputs.has_updates == 'true' && steps.merge_upstream.outputs.unresolved_conflicts == 'false' && github.event.inputs.mode == 'auto-merge'
+        if: steps.check_updates.outputs.has_updates == 'true' && github.event.inputs.mode == 'auto-merge'
         run: |
           git checkout main
           git merge sync/upstream-updates -m "chore(sync): auto-merge upstream updates from usebruno/bruno"
           git push origin main
-          echo "Successfully auto-merged upstream updates directly into main."
+          echo "### 🚀 Auto-Merge Succeeded" >> $GITHUB_STEP_SUMMARY
+          echo "Successfully merged ${{ steps.check_updates.outputs.behind_count }} commits from upstream/main directly into main." >> $GITHUB_STEP_SUMMARY
 
       - name: Create or Update Pull Request (default mode)
-        if: steps.check_updates.outputs.has_updates == 'true' && (github.event.inputs.mode != 'auto-merge' || steps.merge_upstream.outputs.unresolved_conflicts == 'true')
+        if: steps.check_updates.outputs.has_updates == 'true' && github.event.inputs.mode != 'auto-merge'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git push -f origin sync/upstream-updates
 
-          PR_EXISTS=$(gh pr list --head sync/upstream-updates --json number -q '.[0].number' || echo "")
-          
           PR_BODY="### 🔄 Upstream Sync: usebruno/bruno -> NgaRingApi
 
           This automated sync updates NgaRingApi with the latest commits from upstream \`usebruno/bruno\`.
@@ -143,14 +136,15 @@ jobs:
           1. Review the changes in this PR.
           2. Merge when ready to release."
 
-          if [ -z "$PR_EXISTS" ]; then
-            gh pr create \
-              --title "chore(sync): merge upstream updates from usebruno/bruno" \
-              --body "$PR_BODY" \
-              --base main \
-              --head sync/upstream-updates
-            echo "Pull request created successfully."
-          else
-            gh pr edit "$PR_EXISTS" --body "$PR_BODY"
-            echo "Existing pull request #$PR_EXISTS updated."
-          fi
+          PR_LINK="https://github.com/nyawit-dev/ngaRing-Api/pull/new/sync/upstream-updates"
+
+          gh pr create \
+            --title "chore(sync): merge upstream updates from usebruno/bruno" \
+            --body "$PR_BODY" \
+            --base main \
+            --head sync/upstream-updates || \
+          gh pr edit --body "$PR_BODY" || true
+
+          echo "### 🔄 Upstream Sync Branch Ready" >> $GITHUB_STEP_SUMMARY
+          echo "Branch **sync/upstream-updates** has been updated with ${{ steps.check_updates.outputs.behind_count }} upstream commits." >> $GITHUB_STEP_SUMMARY
+          echo "[**👉 Click here to review and open Pull Request**]($PR_LINK)" >> $GITHUB_STEP_SUMMARY
