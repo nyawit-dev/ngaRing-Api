@@ -55,7 +55,7 @@ jobs:
       - name: Add Upstream and Fetch
         run: |
           git remote add upstream https://github.com/usebruno/bruno.git || git remote set-url upstream https://github.com/usebruno/bruno.git
-          git fetch upstream main --tags
+          git fetch upstream main --no-tags
           echo "Upstream remote configured and fetched."
 
       - name: Check for New Commits
