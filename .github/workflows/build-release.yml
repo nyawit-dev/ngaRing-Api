@@ -183,6 +183,7 @@ jobs:
             Local-first, git-friendly API IDE and client for modern developers.
 
             #### What's New in v${{ steps.release_info.outputs.version }}:
+            - **Seamless In-App Auto-Updates**: Direct background updates powered by `electron-updater` with live titlebar progress and one-click restart installation (no manual downloading or installer wizard needed).
             - **Performance & Startup Optimization**: Resolved application freezing and 'Not Responding' on launch when loading large workspaces or collections.
             - **Non-blocking Tree Traversal**: Zero-allocation collection loading, O(1) early exit search, and background worker parsing.
             - **TypeScript Migration**: Converted core collections search, sidebar flattening, and export modules to TypeScript for enhanced reliability.
