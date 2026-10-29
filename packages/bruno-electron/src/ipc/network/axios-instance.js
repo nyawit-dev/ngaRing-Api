@@ -313,7 +313,7 @@ function makeAxiosInstance({
     },
     async (error) => {
       const config = error.config;
-      const timeline = config?.metadata?.timeline || [];
+      let timeline = config?.metadata?.timeline || [];
 
       // A failed request carries the ClientRequest on the error itself when no response came back.
       const errorRequest = error.response?.request || error.request;

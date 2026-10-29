@@ -156,13 +156,15 @@ jobs:
       - name: Determine Release Tag and Title
         id: release_info
         run: |
+          APP_VERSION=$(node -p "require('./packages/bruno-electron/package.json').version")
+          echo "version=${APP_VERSION}" >> $GITHUB_OUTPUT
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
             echo "tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
             echo "title=NgaRingApi ${{ github.ref_name }}" >> $GITHUB_OUTPUT
             echo "prerelease=false" >> $GITHUB_OUTPUT
           else
-            echo "tag=v2.1.0-latest" >> $GITHUB_OUTPUT
-            echo "title=NgaRingApi v2.1.0 (Latest Build)" >> $GITHUB_OUTPUT
+            echo "tag=v${APP_VERSION}" >> $GITHUB_OUTPUT
+            echo "title=NgaRingApi v${APP_VERSION}" >> $GITHUB_OUTPUT
             echo "prerelease=false" >> $GITHUB_OUTPUT
           fi
 
@@ -178,17 +180,17 @@ jobs:
 
             Local-first, git-friendly API IDE and client for modern developers.
 
-            #### What's New:
-            - **NgaRing Git Studio Redesign**: Edge-to-edge widescreen workspace with full-screen maximize toggle.
-            - **Instant 0ms Git Load**: Zero blocking spinners using Stale-While-Revalidate caching.
-            - **Intelligent Diff Viewer**: Syntax-highlighted unified code diff + visual API diff for `.bru` request files.
-            - **Conventional Commit Composer**: One-click conventional commit type chips, character counter, and quick shortcuts.
-            - **Branding & Theme**: NgaRing cat mascot touchpoints and sleek theme tokens.
+            #### What's New in v${{ steps.release_info.outputs.version }}:
+            - **Performance & Startup Optimization**: Resolved application freezing and 'Not Responding' on launch when loading large workspaces or collections.
+            - **Non-blocking Tree Traversal**: Zero-allocation collection loading, O(1) early exit search, and background worker parsing.
+            - **TypeScript Migration**: Converted core collections search, sidebar flattening, and export modules to TypeScript for enhanced reliability.
+            - **V2 SQLite Cache**: High-performance persistent collection caching enabled by default with intelligent filesystem ignore filters.
+            - **Bug Fixes**: Fixed network request timeline reassignment and safe token encryption handling in Electron main process.
 
             #### Download Assets:
-            - **Windows**: `NgaRingApi_2.1.0_x64_win.exe` (NSIS Installer)
-            - **macOS**: `NgaRingApi_2.1.0_x64_mac.dmg`, `NgaRingApi_2.1.0_arm64_mac.dmg` & `.zip`
-            - **Linux**: `NgaRingApi_2.1.0_x64_linux.AppImage` & `.deb`
+            - **Windows**: `NgaRingApi_${{ steps.release_info.outputs.version }}_x64_win.exe` (NSIS Installer)
+            - **macOS**: `NgaRingApi_${{ steps.release_info.outputs.version }}_x64_mac.dmg`, `NgaRingApi_${{ steps.release_info.outputs.version }}_arm64_mac.dmg` & `.zip`
+            - **Linux**: `NgaRingApi_${{ steps.release_info.outputs.version }}_x64_linux.AppImage` & `.deb`
             - **Web App**: `NgaRingApi-Web.zip`
           files: release-assets/*
           prerelease: ${{ steps.release_info.outputs.prerelease == 'true' }}

@@ -5,8 +5,18 @@ import { generateUniqueRequestName } from 'utils/collections';
 import { sanitizeName } from 'utils/common/regex';
 import { formatIpcError } from 'utils/common/error';
 import toast from 'react-hot-toast';
+import type { BrunoCollection } from './types';
 
-const createRequest = async ({ dispatch, collection, itemUid, requestType }) => {
+export type EmptyStateRequestType = 'http' | 'graphql' | 'websocket' | 'grpc';
+
+interface CreateRequestParams {
+  dispatch: any;
+  collection: BrunoCollection;
+  itemUid?: string;
+  requestType: EmptyStateRequestType;
+}
+
+const createRequest = async ({ dispatch, collection, itemUid, requestType }: CreateRequestParams): Promise<void> => {
   try {
     const uniqueName = await generateUniqueRequestName(collection, 'Untitled', itemUid);
     const filename = sanitizeName(uniqueName);
@@ -41,17 +51,34 @@ const createRequest = async ({ dispatch, collection, itemUid, requestType }) => 
         await dispatch(newGrpcRequest(baseParams));
         break;
     }
-  } catch (err) {
+  } catch (err: any) {
     toast.error(formatIpcError(err) || 'An error occurred while adding the request');
   }
 };
+
+export interface EmptyStateMenuItem {
+  id: string;
+  label: string;
+  leftSection: React.ReactNode;
+  onClick: () => void;
+}
+
+interface CreateEmptyStateMenuItemsParams {
+  dispatch: any;
+  collection: BrunoCollection;
+  itemUid?: string;
+}
 
 /**
  * Returns menu items for the empty state "Add request" dropdown.
  * Used by both Collection (empty collection) and CollectionItem (empty folder).
  */
-export const createEmptyStateMenuItems = ({ dispatch, collection, itemUid }) => {
-  const handleCreate = (requestType) => () => {
+export const createEmptyStateMenuItems = ({
+  dispatch,
+  collection,
+  itemUid
+}: CreateEmptyStateMenuItemsParams): EmptyStateMenuItem[] => {
+  const handleCreate = (requestType: EmptyStateRequestType) => () => {
     createRequest({ dispatch, collection, itemUid, requestType });
   };
 

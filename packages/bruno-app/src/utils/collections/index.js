@@ -96,45 +96,100 @@ export const findItemByPathname = (items = [], pathname) => {
 };
 
 export const findItemInCollectionByPathname = (collection, pathname) => {
-  let flattenedItems = flattenItems(collection.items);
-
-  return findItemByPathname(flattenedItems, pathname);
+  if (!collection || !collection.items || !pathname) {
+    return null;
+  }
+  const search = (items) => {
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.pathname === pathname) return item;
+      if (item.items && item.items.length) {
+        const found = search(item.items);
+        if (found) return found;
+      }
+    }
+    return null;
+  };
+  return search(collection.items);
 };
 
 export const findItemInCollectionByItemUid = (collection, itemUid) => {
-  let flattenedItems = flattenItems(collection.items);
-  return findItem(flattenedItems, itemUid);
+  return findItemInCollection(collection, itemUid);
 };
 
 export const findParentItemInCollectionByPathname = (collection, pathname) => {
-  let flattenedItems = flattenItems(collection.items);
-
-  return find(flattenedItems, (item) => {
-    return item.items && find(item.items, (i) => i.pathname === pathname);
-  });
+  if (!collection || !collection.items || !pathname) {
+    return null;
+  }
+  const search = (items) => {
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.items && item.items.length) {
+        for (let j = 0; j < item.items.length; j++) {
+          if (item.items[j].pathname === pathname) return item;
+        }
+        const found = search(item.items);
+        if (found) return found;
+      }
+    }
+    return null;
+  };
+  return search(collection.items);
 };
 
 export const findItemInCollection = (collection, itemUid) => {
-  if (!collection || !collection.items) {
+  if (!collection || !collection.items || !itemUid) {
     return null;
   }
-  let flattenedItems = flattenItems(collection.items);
-
-  return findItem(flattenedItems, itemUid);
+  const search = (items) => {
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.uid === itemUid) return item;
+      if (item.items && item.items.length) {
+        const found = search(item.items);
+        if (found) return found;
+      }
+    }
+    return null;
+  };
+  return search(collection.items);
 };
 
 export const findParentItemInCollection = (collection, itemUid) => {
-  let flattenedItems = flattenItems(collection.items);
-
-  return find(flattenedItems, (item) => {
-    return item.items && find(item.items, (i) => i.uid === itemUid);
-  });
+  if (!collection || !collection.items || !itemUid) {
+    return null;
+  }
+  const search = (items) => {
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.items && item.items.length) {
+        for (let j = 0; j < item.items.length; j++) {
+          if (item.items[j].uid === itemUid) return item;
+        }
+        const found = search(item.items);
+        if (found) return found;
+      }
+    }
+    return null;
+  };
+  return search(collection.items);
 };
 
 export const recursivelyGetAllItemUids = (items = []) => {
-  let flattenedItems = flattenItems(items);
-
-  return map(flattenedItems, (i) => i.uid);
+  const uids = [];
+  const collect = (itms) => {
+    for (let i = 0; i < itms.length; i++) {
+      const item = itms[i];
+      if (item?.uid) {
+        uids.push(item.uid);
+      }
+      if (item?.items?.length) {
+        collect(item.items);
+      }
+    }
+  };
+  collect(items);
+  return uids;
 };
 
 export const findEnvironmentInCollection = (collection, envUid) => {
@@ -150,26 +205,54 @@ export const areItemsLoading = (folder) => {
     return true;
   }
 
-  let flattenedItems = flattenItems(folder.items);
-  return flattenedItems?.reduce((isLoading, i) => {
-    if (i?.loading) {
-      isLoading = true;
+  const check = (items) => {
+    if (!items || !items.length) {
+      return false;
     }
-    return isLoading;
-  }, false);
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item?.loading) {
+        return true;
+      }
+      if (item?.items?.length && check(item.items)) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  return check(folder.items);
 };
 
 export const getItemsLoadStats = (folder) => {
   let loadingCount = 0;
-  let flattenedItems = flattenItems(folder.items);
-  flattenedItems?.forEach((i) => {
-    if (i?.loading) {
-      loadingCount += 1;
+  let totalCount = 0;
+
+  if (!folder || !folder.items) {
+    return {
+      loading: 0,
+      total: 0
+    };
+  }
+
+  const traverse = (items) => {
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      totalCount += 1;
+      if (item?.loading) {
+        loadingCount += 1;
+      }
+      if (item?.items?.length) {
+        traverse(item.items);
+      }
     }
-  });
+  };
+
+  traverse(folder.items);
+
   return {
     loading: loadingCount,
-    total: flattenedItems?.length
+    total: totalCount
   };
 };
 

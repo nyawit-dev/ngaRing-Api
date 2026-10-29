@@ -16,7 +16,7 @@ const Cache = () => {
   const dispatch = useDispatch();
   const { theme } = useTheme();
 
-  const fileCacheEnabled = get(preferences, 'cache.file.enabled', false);
+  const fileCacheEnabled = get(preferences, 'cache.file.enabled', true);
   const sslSessionEnabled = get(preferences, 'cache.sslSession.enabled', false);
 
   const { size: fileCacheSize, clear: clearFileCache } = useFileCache();

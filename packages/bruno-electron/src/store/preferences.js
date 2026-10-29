@@ -78,7 +78,7 @@ const defaultPreferences = {
       enabled: false
     },
     file: {
-      enabled: false
+      enabled: true
     }
   },
   ai: {
@@ -444,7 +444,7 @@ const preferencesUtil = {
     return get(getPreferences(), 'cache.sslSession.enabled', false);
   },
   isFileCacheEnabled: () => {
-    return get(getPreferences(), 'cache.file.enabled', false);
+    return get(getPreferences(), 'cache.file.enabled', true);
   },
   hasLaunchedBefore: () => {
     return get(getPreferences(), 'onboarding.hasLaunchedBefore', false);

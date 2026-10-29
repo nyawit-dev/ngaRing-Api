@@ -1518,7 +1518,7 @@ export const mountScratchCollection = (workspaceUid) => {
         ignore: ['node_modules', '.git']
       };
 
-      const fileCacheEnabled = state.app?.preferences?.cache?.file?.enabled;
+      const fileCacheEnabled = state.app?.preferences?.cache?.file?.enabled ?? true;
       if (fileCacheEnabled) {
         await ipcRenderer.invoke('renderer:mount-collection-v2', {
           collectionUid: scratchCollectionUid,

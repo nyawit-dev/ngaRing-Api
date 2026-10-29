@@ -103,25 +103,35 @@ const RequestTabPanel = () => {
     isVerticalLayoutRef.current = isVerticalLayout;
   }, [isVerticalLayout]);
 
-  // merge `globalEnvironmentVariables` into the active collection and rebuild `collections` immer proxy object
-  const collections = produce(_collections, (draft) => {
-    const collection = find(draft, (c) => c.uid === focusedTab?.collectionUid);
+  // merge `globalEnvironmentVariables` into the active collection
+  const targetCollection = useMemo(() => {
+    return find(_collections, (c) => c.uid === focusedTab?.collectionUid);
+  }, [_collections, focusedTab?.collectionUid]);
 
-    if (collection) {
-      // add selected global env variables to the collection object
-      const globalEnvironmentVariables = getGlobalEnvironmentVariables({
-        globalEnvironments,
-        activeGlobalEnvironmentUid
-      });
-      const globalEnvSecrets = getGlobalEnvironmentVariablesMasked({ globalEnvironments, activeGlobalEnvironmentUid });
-      collection.globalEnvironmentVariables = globalEnvironmentVariables;
-      collection.globalEnvSecrets = globalEnvSecrets;
-      collection.globalEnvironments = globalEnvironments;
-      collection.activeGlobalEnvironmentUid = activeGlobalEnvironmentUid;
+  const collection = useMemo(() => {
+    if (!targetCollection) {
+      return null;
     }
-  });
+    const globalEnvironmentVariables = getGlobalEnvironmentVariables({
+      globalEnvironments,
+      activeGlobalEnvironmentUid
+    });
+    const globalEnvSecrets = getGlobalEnvironmentVariablesMasked({ globalEnvironments, activeGlobalEnvironmentUid });
+    return {
+      ...targetCollection,
+      globalEnvironmentVariables,
+      globalEnvSecrets,
+      globalEnvironments,
+      activeGlobalEnvironmentUid
+    };
+  }, [targetCollection, globalEnvironments, activeGlobalEnvironmentUid]);
 
-  const collection = find(collections, (c) => c.uid === focusedTab?.collectionUid);
+  const collections = useMemo(() => {
+    if (!collection) {
+      return _collections;
+    }
+    return _collections.map((c) => (c.uid === collection.uid ? collection : c));
+  }, [_collections, collection]);
 
   const isItemsLoading = useMemo(() => {
     return collection?.mountStatus === 'mounting' || areItemsLoading(collection);

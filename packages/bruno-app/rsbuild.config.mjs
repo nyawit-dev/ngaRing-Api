@@ -38,7 +38,7 @@ export default defineConfig({
     define: {
       __BRUNO_BENCHMARK__: JSON.stringify(process.env.BRUNO_BENCHMARK === 'true')
     },
-    tsconfigPath: './jsconfig.json', // Specifies the path to the JavaScript/TypeScript configuration file,
+    tsconfigPath: './tsconfig.json', // Specifies the path to the JavaScript/TypeScript configuration file,
     exclude: [
       '**/test-utils/**',
       '**/*.test.*',

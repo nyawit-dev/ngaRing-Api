@@ -6,15 +6,23 @@ import {
   doesFolderHaveItemsMatchSearchText,
   doesCollectionHaveItemsMatchingSearchText
 } from './search';
+import type { BrunoItem, BrunoCollection, SidebarRow } from './types';
 
-const groupCollectionItems = (collectionItems) => {
-  const folders = [];
-  const apps = [];
-  const requests = [];
+interface GroupedItems {
+  folders: BrunoItem[];
+  apps: BrunoItem[];
+  requests: BrunoItem[];
+}
 
-  const sortBySeq = (items) => [...items].sort((a, b) => a.seq - b.seq);
+const groupCollectionItems = (collectionItems: BrunoItem[]): GroupedItems => {
+  const folders: BrunoItem[] = [];
+  const apps: BrunoItem[] = [];
+  const requests: BrunoItem[] = [];
 
-  for (const item of collectionItems) {
+  const sortBySeq = (items: BrunoItem[]) => [...items].sort((a, b) => ((a.seq ?? 0) - (b.seq ?? 0)));
+
+  for (let i = 0; i < collectionItems.length; i++) {
+    const item = collectionItems[i];
     if (!item || item.isTransient) continue;
 
     if (isItemAFolder(item)) {
@@ -33,15 +41,32 @@ const groupCollectionItems = (collectionItems) => {
   };
 };
 
+interface CollectionContext {
+  collectionUid: string;
+  collectionPathname: string | null;
+  collectionId: string;
+  hasSearch: boolean;
+  searchText: string;
+  appendRow: (row: any) => void;
+  addItemToIndex: (uid: string, item: BrunoItem) => void;
+}
+
+interface WalkChildrenOptions {
+  collectionItems?: BrunoItem[];
+  depth: number;
+  parentName: string | null;
+  ancestorPath?: string[];
+}
+
 /**
  * Flattens the children of a collection or folder into sidebar rows.
  * Returns the number of visible children to determine whether an empty-state
  * CTA should be shown.
  */
 const walkChildren = (
-  collectionContext,
-  { collectionItems = [], depth, parentName, ancestorPath = [] }
-) => {
+  collectionContext: CollectionContext,
+  { collectionItems = [], depth, parentName, ancestorPath = [] }: WalkChildrenOptions
+): number => {
   const {
     collectionUid,
     collectionPathname,
@@ -54,14 +79,14 @@ const walkChildren = (
 
   // Scope row ids by the full ancestor uid chain so duplicated subtrees remain
   // distinct even when they share the same item uids.
-  // JSON-encode the path to avoid delimiter collisions since uids are opaque strings.
   const ancestorKey = JSON.stringify(ancestorPath);
 
   let visibleChildCount = 0;
 
   const { folders, apps, requests } = groupCollectionItems(collectionItems);
 
-  for (const folder of folders) {
+  for (let i = 0; i < folders.length; i++) {
+    const folder = folders[i];
     if (hasSearch && !doesFolderHaveItemsMatchSearchText(folder, searchText)) {
       continue;
     }
@@ -110,7 +135,8 @@ const walkChildren = (
   }
 
   if (!hasSearch) {
-    for (const app of apps) {
+    for (let i = 0; i < apps.length; i++) {
+      const app = apps[i];
       visibleChildCount++;
 
       appendRow({
@@ -129,7 +155,8 @@ const walkChildren = (
     }
   }
 
-  for (const request of requests) {
+  for (let i = 0; i < requests.length; i++) {
+    const request = requests[i];
     if (hasSearch && !doesRequestMatchSearchText(request, searchText)) {
       continue;
     }
@@ -150,11 +177,10 @@ const walkChildren = (
 
     addItemToIndex(request.uid, request);
 
-    const hasExamples
-      = request.type === 'http-request' && Array.isArray(request.examples);
+    const hasExamples = request.type === 'http-request' && Array.isArray(request.examples);
 
     if (hasExamples && (hasSearch || !isCollectionItemCollapsed(request))) {
-      request.examples.forEach((example, index) => {
+      request.examples.forEach((example: any, index: number) => {
         appendRow({
           id: `${collectionUid}:${ancestorKey}:${request.uid}:ex:${example.uid || index}`,
           kind: 'example',
@@ -175,6 +201,15 @@ const walkChildren = (
   return visibleChildCount;
 };
 
+interface FlattenCollectionOptions {
+  collection: BrunoCollection;
+  hasSearch: boolean;
+  searchText: string;
+  appendRow: (row: any) => void;
+  addItemToIndex: (uid: string, item: BrunoItem) => void;
+  addCollectionToIndex: (uid: string, collection: BrunoCollection) => void;
+}
+
 /**
  * Adds a collection and its visible children to the flat sidebar row list.
  */
@@ -185,10 +220,10 @@ const flattenCollection = ({
   appendRow,
   addItemToIndex,
   addCollectionToIndex
-}) => {
+}: FlattenCollectionOptions): void => {
   if (
-    hasSearch
-    && !doesCollectionHaveItemsMatchingSearchText(collection, searchText)
+    hasSearch &&
+    !doesCollectionHaveItemsMatchingSearchText(collection, searchText)
   ) {
     return;
   }
@@ -215,7 +250,7 @@ const flattenCollection = ({
 
   if (!isExpanded) return;
 
-  const collectionContext = {
+  const collectionContext: CollectionContext = {
     collectionUid: collection.uid,
     collectionPathname: collection.pathname || null,
     collectionId,
@@ -233,10 +268,10 @@ const flattenCollection = ({
 
   // Append the collection-root empty-state CTA row.
   if (
-    !hasSearch
-    && visibleChildCount === 0
-    && collection.mountStatus === 'mounted'
-    && !collection.isLoading
+    !hasSearch &&
+    visibleChildCount === 0 &&
+    collection.mountStatus === 'mounted' &&
+    !collection.isLoading
   ) {
     appendRow({
       id: `${collection.uid}:root:cta`,
@@ -252,29 +287,36 @@ const flattenCollection = ({
   }
 };
 
+export interface FlattenSidebarTreeOptions {
+  searchText?: string;
+}
+
+export interface FlattenSidebarTreeResult {
+  rows: SidebarRow[];
+  itemsByUid: Map<string, BrunoItem>;
+  collectionsByUid: Map<string, BrunoCollection>;
+  rowIndexByItemUid: Map<string, number>;
+  rowIndexByCollectionUid: Map<string, number>;
+}
+
 /**
- * convert sidebar entries into a flat, ordered array of layout rows.
- * each row carry only structural data.
- *
- * @param {Array} sidebarEntries
- * @param {{ searchText?: string }} options
- * @returns {{
- *   rows: Array<Object>,
- *   itemsByUid: Map,
- *   collectionsByUid: Map
- * }}
+ * Convert sidebar entries into a flat, ordered array of layout rows.
+ * Each row carries only structural data.
  */
-export const flattenSidebarTree = (sidebarEntries = [], options = {}) => {
+export const flattenSidebarTree = (
+  sidebarEntries: any[] = [],
+  options: FlattenSidebarTreeOptions = {}
+): FlattenSidebarTreeResult => {
   const { searchText = '' } = options;
   const hasSearch = Boolean(searchText.trim());
 
-  const rows = [];
-  const itemsByUid = new Map();
-  const collectionsByUid = new Map();
-  const rowIndexByItemUid = new Map();
-  const rowIndexByCollectionUid = new Map();
+  const rows: SidebarRow[] = [];
+  const itemsByUid = new Map<string, BrunoItem>();
+  const collectionsByUid = new Map<string, BrunoCollection>();
+  const rowIndexByItemUid = new Map<string, number>();
+  const rowIndexByCollectionUid = new Map<string, number>();
 
-  const appendRow = (row) => {
+  const appendRow = (row: SidebarRow) => {
     const index = rows.push(row) - 1;
 
     if (row.kind === 'collection' && row.collectionUid) {
@@ -285,11 +327,12 @@ export const flattenSidebarTree = (sidebarEntries = [], options = {}) => {
       rowIndexByItemUid.set(row.itemUid, index);
     }
   };
-  const addItemToIndex = (uid, item) => itemsByUid.set(uid, item);
-  const addCollectionToIndex = (uid, collection) =>
+  const addItemToIndex = (uid: string, item: BrunoItem) => itemsByUid.set(uid, item);
+  const addCollectionToIndex = (uid: string, collection: BrunoCollection) =>
     collectionsByUid.set(uid, collection);
 
-  for (const entry of sidebarEntries) {
+  for (let i = 0; i < sidebarEntries.length; i++) {
+    const entry = sidebarEntries[i];
     if (!entry) continue;
 
     // A ghost represents a missing Git-backed collection and is never expanded.
@@ -300,9 +343,9 @@ export const flattenSidebarTree = (sidebarEntries = [], options = {}) => {
         id: `ghost:${ghost.path}`,
         kind: 'ghost',
         depth: 0,
-        collectionUid: null,
+        collectionUid: (null as any),
         collectionPathname: ghost.path || null,
-        itemUid: null,
+        itemUid: (null as any),
         sortName: ghost.name || null
       });
 

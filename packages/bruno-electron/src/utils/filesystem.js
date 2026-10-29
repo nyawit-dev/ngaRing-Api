@@ -63,8 +63,18 @@ const isValidCollectionDirectory = (dirPath) => {
 };
 
 const hasSubDirectories = (dir) => {
-  const files = fs.readdirSync(dir);
-  return files.some((file) => fs.statSync(path.join(dir, file)).isDirectory());
+  try {
+    const files = fs.readdirSync(dir);
+    return files.some((file) => {
+      try {
+        return fs.statSync(path.join(dir, file)).isDirectory();
+      } catch (_) {
+        return false;
+      }
+    });
+  } catch (_) {
+    return false;
+  }
 };
 
 const normalizeAndResolvePath = (pathname) => {
@@ -538,30 +548,39 @@ const getCollectionStats = async (directoryPath) => {
   let maxFileSize = 0;
 
   async function calculateStats(directory) {
-    const entries = await fsPromises.readdir(directory, { withFileTypes: true });
+    try {
+      const entries = await fsPromises.readdir(directory, { withFileTypes: true });
 
-    const tasks = entries.map(async (entry) => {
-      const fullPath = path.join(directory, entry.name);
+      const tasks = entries.map(async (entry) => {
+        try {
+          const fullPath = path.join(directory, entry.name);
 
-      if (entry.isDirectory()) {
-        if (['node_modules', '.git'].includes(entry.name)) {
-          return;
+          if (entry.isDirectory()) {
+            if (['node_modules', '.git', '.next', 'dist', 'build', '.gradle', 'vendor', '.venv', '.idea'].includes(entry.name)) {
+              return;
+            }
+
+            await calculateStats(fullPath);
+          }
+
+          const ext = path.extname(fullPath);
+          if (ext === '.bru' || ext === '.yml' || ext === '.yaml') {
+            const stats = await fsPromises.stat(fullPath);
+            size += stats?.size || 0;
+            if (maxFileSize < (stats?.size || 0)) {
+              maxFileSize = stats?.size || 0;
+            }
+            filesCount += 1;
+          }
+        } catch (_) {
+          // Ignore inaccessible file or folder
         }
+      });
 
-        await calculateStats(fullPath);
-      }
-
-      if (path.extname(fullPath) === '.bru') {
-        const stats = await fsPromises.stat(fullPath);
-        size += stats?.size;
-        if (maxFileSize < stats?.size) {
-          maxFileSize = stats?.size;
-        }
-        filesCount += 1;
-      }
-    });
-
-    await Promise.all(tasks);
+      await Promise.all(tasks);
+    } catch (_) {
+      // Ignore unreadable directory
+    }
   }
 
   await calculateStats(directoryPath);
@@ -742,23 +761,32 @@ const isCollectionRootBruFile = (pathname, collectionPath) => {
 const scanForBrunoFiles = async (dir) => {
   const brunoFolders = [];
 
-  const scanDir = (currentDir) => {
-    const files = fs.readdirSync(currentDir);
+  const scanDir = (currentDir, depth = 0) => {
+    if (depth > 10) return;
+    try {
+      const files = fs.readdirSync(currentDir);
 
-    if (files && files.length) {
-      files.forEach((file) => {
-        const fullPath = path.join(currentDir, file);
-        const stat = fs.statSync(fullPath);
+      if (files && files.length) {
+        files.forEach((file) => {
+          try {
+            const fullPath = path.join(currentDir, file);
+            const stat = fs.statSync(fullPath);
 
-        if (stat.isDirectory()) {
-          if (['node_modules', '.git'].includes(file)) {
-            return;
+            if (stat.isDirectory()) {
+              if (['node_modules', '.git', '.next', 'dist', 'build', '.gradle', 'vendor', '.venv', '.idea'].includes(file)) {
+                return;
+              }
+              scanDir(fullPath, depth + 1);
+            } else if ((file === 'bruno.json' || file === 'opencollection.yml') && !brunoFolders.includes(currentDir)) {
+              brunoFolders.push(currentDir);
+            }
+          } catch (_) {
+            // Ignore inaccessible file or folder
           }
-          scanDir(fullPath);
-        } else if ((file === 'bruno.json' || file === 'opencollection.yml') && !brunoFolders.includes(currentDir)) {
-          brunoFolders.push(currentDir);
-        }
-      });
+        });
+      }
+    } catch (_) {
+      // Ignore unreadable directory
     }
   };
 

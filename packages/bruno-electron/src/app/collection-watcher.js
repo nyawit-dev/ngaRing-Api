@@ -832,14 +832,20 @@ class CollectionWatcher {
       ignoreInitial,
       usePolling: isWSLPath(watchPath) || forcePolling ? true : false,
       ignored: (filepath) => {
-        const normalizedPath = normalizeAndResolvePath(filepath);
-        const relativePath = path.relative(watchPath, normalizedPath);
         const basename = path.basename(filepath);
 
         // Ignore .env files - handled by dotenv-watcher
         if (basename === '.env' || basename.startsWith('.env.')) {
           return true;
         }
+
+        // Fast-path ignore common directories before disk lstat
+        if (filepath.includes('node_modules') || filepath.includes('.git')) {
+          return true;
+        }
+
+        const normalizedPath = normalizeAndResolvePath(filepath);
+        const relativePath = path.relative(watchPath, normalizedPath);
 
         // Check if any path segment matches a default ignore pattern (handles symlinks)
         const pathSegments = relativePath.split(path.sep);
