@@ -122,7 +122,9 @@ jobs:
             packages/bruno-electron/out/*.zip
             packages/bruno-electron/out/*.AppImage
             packages/bruno-electron/out/*.deb
-          if-no-files-found: error
+            packages/bruno-electron/out/latest*.yml
+            packages/bruno-electron/out/*.blockmap
+          if-no-files-found: warn
           retention-days: 14
 
   create-release:
@@ -145,7 +147,7 @@ jobs:
       - name: Prepare release assets
         run: |
           mkdir -p release-assets
-          find release-downloads/ -type f \( -name "*.exe" -o -name "*.dmg" -o -name "*.zip" -o -name "*.AppImage" -o -name "*.deb" \) -exec cp {} release-assets/ \;
+          find release-downloads/ -type f \( -name "*.exe" -o -name "*.dmg" -o -name "*.zip" -o -name "*.AppImage" -o -name "*.deb" -o -name "latest*.yml" -o -name "*.blockmap" \) -exec cp {} release-assets/ \;
           if [ -d "release-downloads/ngaringapi-web-dist" ]; then
             cd release-downloads/ngaringapi-web-dist
             zip -r ../../release-assets/NgaRingApi-Web.zip .

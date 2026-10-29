@@ -121,6 +121,18 @@ const AppMenu = () => {
       label: 'Help',
       submenu: [
         {
+          id: 'check-for-updates',
+          label: 'Check for Updates...',
+          onClick: () => {
+            if (ipcRenderer) {
+              ipcRenderer.invoke('updater:check-for-updates').catch((err) => {
+                console.error('Check for updates error:', err);
+              });
+            }
+          }
+        },
+        { type: 'divider', id: 'help-div-1' },
+        {
           id: 'about',
           label: 'About NgaRingApi',
           onClick: () => ipcRenderer?.invoke('renderer:open-about')

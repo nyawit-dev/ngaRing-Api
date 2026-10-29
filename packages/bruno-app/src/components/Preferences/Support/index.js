@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   IconSpeakerphone,
   IconBrandTwitter,
@@ -6,10 +6,12 @@ import {
   IconBrandDiscord,
   IconBrandLinkedin,
   IconBook,
-  IconExternalLink
+  IconExternalLink,
+  IconRefresh
 } from '@tabler/icons';
 import StyledWrapper from './StyledWrapper';
 import { useTranslation } from 'react-i18next';
+import { version } from '../../../../package.json';
 
 const SUPPORT_GROUPS = [
   {
@@ -70,10 +72,43 @@ const SUPPORT_GROUPS = [
 
 const Support = () => {
   const { t } = useTranslation();
+  const [checking, setChecking] = useState(false);
+
+  const handleCheckUpdate = (e) => {
+    e.preventDefault();
+    if (window.ipcRenderer) {
+      setChecking(true);
+      window.ipcRenderer.invoke('updater:check-for-updates')
+        .finally(() => {
+          setTimeout(() => setChecking(false), 1200);
+        });
+    }
+  };
 
   return (
     <StyledWrapper className="w-full">
       <div className="section-header">Support</div>
+
+      <section className="support-group mb-4" aria-labelledby="support-updates-label">
+        <h3 className="support-group-label select-none" id="support-updates-label">
+          Software Updates
+        </h3>
+        <div className="support-card p-3 flex flex-row items-center justify-between">
+          <div className="flex flex-col">
+            <span className="text-sm font-medium">NgaRingApi Desktop v{version}</span>
+            <span className="text-xs text-muted">Automatic background updates enabled</span>
+          </div>
+          <button
+            type="button"
+            className="btn btn-sm btn-secondary flex items-center gap-1.5"
+            onClick={handleCheckUpdate}
+            disabled={checking}
+          >
+            <IconRefresh size={14} className={checking ? 'animate-spin' : ''} />
+            <span>{checking ? 'Checking...' : 'Check for Updates'}</span>
+          </button>
+        </div>
+      </section>
 
       {SUPPORT_GROUPS.map((group) => (
         <section className="support-group" key={group.key} aria-labelledby={`support-${group.key}-label`}>

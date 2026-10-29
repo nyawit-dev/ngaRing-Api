@@ -13,7 +13,9 @@ pnpm-lock.yaml
 .pnp.js
 bun.lockb
 bun.lock
-
+.opencode
+.claude
+.agents
 # testing
 coverage
 

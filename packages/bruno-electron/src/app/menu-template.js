@@ -96,6 +96,13 @@ const template = [
     role: 'help',
     submenu: [
       {
+        label: 'Check for Updates...',
+        click: () => {
+          ipcMain.emit('menu:check-for-updates');
+        }
+      },
+      { type: 'separator' },
+      {
         label: 'About NgaRingApi',
         click: () => {
           const aboutWindow = new BrowserWindow({
