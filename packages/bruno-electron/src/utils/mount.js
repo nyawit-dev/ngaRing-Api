@@ -3,8 +3,48 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const { posixifyPath } = require('./filesystem');
 
-const DENY_DIRS = new Set(['node_modules', '.git', '.svn', '.hg', '.bruno']);
+const DENY_DIRS = new Set([
+  'node_modules',
+  '.git',
+  '.svn',
+  '.hg',
+  '.bruno',
+  '.next',
+  'dist',
+  'build',
+  'out',
+  '.gradle',
+  'vendor',
+  '.venv',
+  'env',
+  '.idea',
+  '.vscode',
+  'coverage',
+  'target',
+  'bin',
+  'obj',
+  '.cache',
+  'tmp',
+  'temp',
+  '.turbo',
+  '.parcel-cache',
+  '.nuxt',
+  '.output',
+  '.svelte-kit',
+  'bower_components',
+  'jspm_packages',
+  '.pytest_cache',
+  '__pycache__'
+]);
 const DEFAULT_DENYLIST = ['**/.DS_Store', '**/Thumbs.db'];
+
+const BRUNO_FILE_EXTENSIONS = new Set(['.bru', '.yml', '.yaml']);
+const isBrunoCandidateFile = (filename, relDir) => {
+  if (filename === 'bruno.json') return true;
+  if (filename === '.env' && (!relDir || relDir === '.' || relDir === '')) return true;
+  const ext = path.extname(filename).toLowerCase();
+  return BRUNO_FILE_EXTENSIONS.has(ext);
+};
 
 const sha256 = (input) => crypto.createHash('sha256').update(input).digest('hex');
 const hashFile = (absPath) => sha256(fs.readFileSync(absPath));
@@ -39,7 +79,7 @@ const isDenied = (relativePathPosix, patterns) => {
   return false;
 };
 
-const walk = (root, denylist) => {
+const walk = (root, denylist, options = {}) => {
   const out = [];
   const visited = new Set();
   const visit = (absDir, relDir) => {
@@ -52,7 +92,13 @@ const walk = (root, denylist) => {
     if (visited.has(canonicalDir)) return;
     visited.add(canonicalDir);
 
-    const entries = fs.readdirSync(absDir, { withFileTypes: true });
+    let entries;
+    try {
+      entries = fs.readdirSync(absDir, { withFileTypes: true });
+    } catch (err) {
+      return;
+    }
+
     for (const entry of entries) {
       const childAbs = path.join(absDir, entry.name);
       const childRel = relDir ? path.join(relDir, entry.name) : entry.name;
@@ -75,6 +121,7 @@ const walk = (root, denylist) => {
         if (matchesPlainPrefix(posixifyPath(childRel), denylist)) continue;
         visit(childAbs, childRel);
       } else if (isFile) {
+        if (!options.allFiles && !isBrunoCandidateFile(entry.name, relDir)) continue;
         if (isDenied(posixifyPath(childRel), denylist)) continue;
         out.push({ relativePath: childRel, absolutePath: childAbs });
       }
@@ -129,5 +176,7 @@ module.exports = {
   resolveDenylist,
   isDenied,
   walk,
-  defaultClassify
+  defaultClassify,
+  isBrunoCandidateFile,
+  DENY_DIRS
 };

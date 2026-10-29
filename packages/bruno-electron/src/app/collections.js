@@ -94,9 +94,14 @@ const openCollection = async (win, watcher, collectionPath, options = {}) => {
       let brunoConfig = await getCollectionConfigFile(collectionPath);
       const uid = generateUidBasedOnHash(collectionPath);
       brunoConfig = await transformBrunoConfigAfterRead(brunoConfig, collectionPath);
-      const { size, filesCount } = await getCollectionStats(collectionPath);
-      brunoConfig.size = size;
-      brunoConfig.filesCount = filesCount;
+      // Set initial collection stats immediately to avoid blocking collection open on startup
+      brunoConfig.size = 0;
+      brunoConfig.filesCount = 0;
+      getCollectionStats(collectionPath).then(({ size, filesCount }) => {
+        brunoConfig.size = size;
+        brunoConfig.filesCount = filesCount;
+      }).catch(() => {});
+
       win.webContents.send('main:collection-opened', collectionPath, uid, brunoConfig, { silent: !!options.silent });
       return {
         path: collectionPath,
@@ -129,9 +134,13 @@ const openCollection = async (win, watcher, collectionPath, options = {}) => {
 
     brunoConfig = await transformBrunoConfigAfterRead(brunoConfig, collectionPath);
 
-    const { size, filesCount } = await getCollectionStats(collectionPath);
-    brunoConfig.size = size;
-    brunoConfig.filesCount = filesCount;
+    // Set initial collection stats immediately to avoid blocking collection open on startup
+    brunoConfig.size = 0;
+    brunoConfig.filesCount = 0;
+    getCollectionStats(collectionPath).then(({ size, filesCount }) => {
+      brunoConfig.size = size;
+      brunoConfig.filesCount = filesCount;
+    }).catch(() => {});
 
     win.webContents.send('main:collection-opened', collectionPath, uid, brunoConfig, { silent: !!options.silent });
     ipcMain.emit('main:collection-opened', win, collectionPath, uid, brunoConfig);

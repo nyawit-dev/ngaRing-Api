@@ -506,7 +506,7 @@ app.on('ready', async () => {
       let ogSend = mainWindow.webContents.send;
       mainWindow.webContents.send = function (channel, ...args) {
         return ogSend.apply(this, [channel, ...args.map((_) => {
-          // todo: replace this with @msgpack/msgpack encode/decode
+          if (_ === null || typeof _ !== 'object') return _;
           return safeParseJSON(safeStringifyJSON(_));
         })]);
       };

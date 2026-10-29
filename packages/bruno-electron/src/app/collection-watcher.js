@@ -824,9 +824,42 @@ class CollectionWatcher {
       setBrunoConfig(collectionUid, brunoConfig);
     }
 
-    // Always ignore node_modules and .git, regardless of user config
-    // This prevents infinite loops with symlinked directories (e.g., npm workspaces)
-    const defaultIgnores = ['node_modules', '.git'];
+    // Always ignore heavy build/dependency/cache directories, regardless of user config
+    // This prevents infinite loops and startup freezes from massive non-collection trees
+    const defaultIgnores = [
+      'node_modules',
+      '.git',
+      '.svn',
+      '.hg',
+      '.bruno',
+      '.next',
+      'dist',
+      'build',
+      'out',
+      '.gradle',
+      'vendor',
+      '.venv',
+      'env',
+      '.idea',
+      '.vscode',
+      'coverage',
+      'target',
+      'bin',
+      'obj',
+      '.cache',
+      'tmp',
+      'temp',
+      '.turbo',
+      '.parcel-cache',
+      '.nuxt',
+      '.output',
+      '.svelte-kit',
+      'bower_components',
+      'jspm_packages',
+      '.pytest_cache',
+      '__pycache__'
+    ];
+    const fastIgnoreRegex = /[\\/](?:node_modules|\.git|\.svn|\.hg|\.bruno|\.next|dist|build|out|\.gradle|vendor|\.venv|\.idea|\.vscode|target|coverage|\.cache|tmp|temp|\.turbo|__pycache__)(?:[\\/]|$)/i;
 
     const watcher = chokidar.watch(watchPath, {
       ignoreInitial,
@@ -839,8 +872,8 @@ class CollectionWatcher {
           return true;
         }
 
-        // Fast-path ignore common directories before disk lstat
-        if (filepath.includes('node_modules') || filepath.includes('.git')) {
+        // Fast-path ignore common build/cache directories before disk lstat
+        if (fastIgnoreRegex.test(filepath)) {
           return true;
         }
 
