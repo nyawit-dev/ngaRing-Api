@@ -67,16 +67,8 @@ const config = {
   dmg: {
     title: 'NgaRingApi ${version}',
     icon: 'resources/icons/mac/icon.icns',
-    iconSize: 96,
-    iconTextSize: 13,
-    window: {
-      width: 600,
-      height: 420
-    },
-    contents: [
-      { x: 160, y: 210, type: 'file' },
-      { x: 440, y: 210, type: 'link', path: '/Applications' }
-    ]
+    sign: false,
+    writeUpdateInfo: false
   },
   linux: {
     artifactName: 'NgaRingApi_${version}_${arch}_${os}.${ext}',
