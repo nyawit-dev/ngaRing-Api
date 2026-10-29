@@ -70,7 +70,7 @@ const Wrapper = styled.div`
       max-width: 1780px;
       width: clamp(860px, 97vw, 1780px);
       min-width: min(100%, 800px);
-      margin: 48px auto 16px auto !important;
+      margin: 52px auto 18px auto !important;
       border-radius: 12px;
       overflow: hidden;
       border: 1px solid ${(props) => props.theme.border.border0};

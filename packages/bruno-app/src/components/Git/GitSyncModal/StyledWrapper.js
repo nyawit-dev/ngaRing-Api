@@ -90,6 +90,7 @@ const StyledWrapper = styled.div`
       gap: 0.5rem;
       flex-shrink: 0;
       justify-content: flex-end;
+      padding-right: 0.5rem;
     }
   }
 
