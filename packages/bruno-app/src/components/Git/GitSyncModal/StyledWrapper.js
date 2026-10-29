@@ -19,18 +19,18 @@ const StyledWrapper = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: clamp(660px, 92vh, 1080px);
-  max-height: calc(100vh - 32px);
-  min-height: 540px;
+  height: clamp(620px, calc(100vh - 76px), 1080px);
+  max-height: calc(100vh - 68px);
+  min-height: 520px;
   overflow: hidden;
   color: ${(props) => props.theme.text};
   background-color: ${(props) => props.theme.background.base};
   box-sizing: border-box;
 
   &.is-maximized {
-    height: 100vh !important;
-    max-height: 100vh !important;
-    min-height: 100vh !important;
+    height: calc(100vh - 36px) !important;
+    max-height: calc(100vh - 36px) !important;
+    min-height: calc(100vh - 36px) !important;
     border-radius: 0 !important;
   }
 
@@ -384,6 +384,86 @@ const StyledWrapper = styled.div`
       &.is-spinning {
         animation: ${spin} 1s linear infinite;
         color: ${(props) => props.theme.primary.solid};
+      }
+    }
+
+    .git-header-divider {
+      width: 1px;
+      height: 20px;
+      background-color: ${(props) => props.theme.border.border0};
+      margin: 0 4px;
+      flex-shrink: 0;
+    }
+
+    .git-view-toggle-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 0.35rem 0.6rem;
+      border-radius: 6px;
+      background-color: ${(props) => props.theme.background.surface0};
+      border: 1px solid ${(props) => props.theme.border.border0};
+      color: ${(props) => props.theme.text.subtext0};
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: 500;
+      transition: all 0.15s ease;
+
+      .toggle-label {
+        line-height: 1;
+      }
+
+      &:hover {
+        color: ${(props) => props.theme.text};
+        background-color: ${(props) => props.theme.background.surface1};
+      }
+
+      &.is-active {
+        color: ${(props) => props.theme.primary.solid};
+        border-color: ${(props) => props.theme.primary.solid};
+        background-color: ${(props) => props.theme.background.surface1};
+      }
+    }
+
+    .git-dialog-close-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0.35rem 0.7rem;
+      border-radius: 6px;
+      background-color: ${(props) => props.theme.background.surface0};
+      border: 1px solid ${(props) => props.theme.border.border0};
+      color: ${(props) => props.theme.text};
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: 500;
+      transition: all 0.15s ease;
+
+      .close-text {
+        line-height: 1;
+      }
+
+      .close-kbd {
+        font-size: 0.625rem;
+        font-weight: 600;
+        font-family: inherit;
+        padding: 0.08rem 0.32rem;
+        border-radius: 4px;
+        background-color: ${(props) => props.theme.background.surface1};
+        color: ${(props) => props.theme.text.subtext0};
+        border: 1px solid ${(props) => props.theme.border.border1};
+      }
+
+      &:hover {
+        background-color: rgba(239, 68, 68, 0.15);
+        border-color: rgba(239, 68, 68, 0.4);
+        color: #ef4444;
+
+        .close-kbd {
+          background-color: rgba(239, 68, 68, 0.2);
+          color: #ef4444;
+          border-color: rgba(239, 68, 68, 0.4);
+        }
       }
     }
 

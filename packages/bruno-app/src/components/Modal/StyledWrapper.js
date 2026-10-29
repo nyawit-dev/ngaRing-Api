@@ -70,21 +70,22 @@ const Wrapper = styled.div`
       max-width: 1780px;
       width: clamp(860px, 97vw, 1780px);
       min-width: min(100%, 800px);
-      margin: clamp(8px, 1.5vh, 20px) auto !important;
-      border-radius: 14px;
+      margin: 48px auto 16px auto !important;
+      border-radius: 12px;
       overflow: hidden;
       border: 1px solid ${(props) => props.theme.border.border0};
-      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.55);
+      box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.05);
       transition: width 0.2s cubic-bezier(0.16, 1, 0.3, 1), height 0.2s cubic-bezier(0.16, 1, 0.3, 1), margin 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 
       &.is-maximized {
         width: 100vw !important;
         max-width: 100vw !important;
-        height: 100vh !important;
-        max-height: 100vh !important;
-        margin: 0 !important;
+        height: calc(100vh - 36px) !important;
+        max-height: calc(100vh - 36px) !important;
+        margin: 36px auto 0 auto !important;
         border-radius: 0 !important;
         border: none !important;
+        border-top: 1px solid ${(props) => props.theme.border.border0} !important;
       }
     }
 

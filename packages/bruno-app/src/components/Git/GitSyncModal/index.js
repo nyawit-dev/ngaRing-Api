@@ -810,8 +810,16 @@ const GitSyncModal = ({ collection, onClose }) => {
               </span>
             </div>
             <div className="git-header-right">
-              <button type="button" className="icon-btn-close" onClick={onClose} aria-label="Close dialog">
-                <IconX size={18} />
+              <button
+                type="button"
+                className="git-dialog-close-btn"
+                onClick={onClose}
+                title="Tutup dialog Git (Esc)"
+                aria-label="Tutup dialog Git"
+              >
+                <IconX size={14} strokeWidth={2.2} />
+                <span className="close-text">Tutup</span>
+                <span className="close-kbd">Esc</span>
               </button>
             </div>
           </div>
@@ -1061,18 +1069,29 @@ const GitSyncModal = ({ collection, onClose }) => {
                 <IconRefresh size={14} />
               </button>
 
+              <div className="git-header-divider" />
+
               <button
                 type="button"
-                className="icon-btn-maximize"
+                className={`git-view-toggle-btn ${isMaximized ? 'is-active' : ''}`}
                 onClick={() => setIsMaximized((prev) => !prev)}
-                title={isMaximized ? 'Restore dialog' : 'Maximize to fullscreen'}
-                aria-label={isMaximized ? 'Restore dialog' : 'Maximize to fullscreen'}
+                title={isMaximized ? 'Kembalikan ke ukuran normal' : 'Perluas tampilan layar penuh'}
+                aria-label={isMaximized ? 'Perkecil tampilan' : 'Perbesar layar penuh'}
               >
-                {isMaximized ? <IconMinimize size={16} /> : <IconMaximize size={16} />}
+                {isMaximized ? <IconMinimize size={13} strokeWidth={2} /> : <IconMaximize size={13} strokeWidth={2} />}
+                <span className="toggle-label">{isMaximized ? 'Normal' : 'Layar Penuh'}</span>
               </button>
 
-              <button type="button" className="icon-btn-close" onClick={onClose} aria-label="Close Git modal">
-                <IconX size={18} />
+              <button
+                type="button"
+                className="git-dialog-close-btn"
+                onClick={onClose}
+                title="Tutup Git Studio (Esc)"
+                aria-label="Tutup Git Studio"
+              >
+                <IconX size={14} strokeWidth={2.2} />
+                <span className="close-text">Tutup</span>
+                <span className="close-kbd">Esc</span>
               </button>
             </div>
           </div>
