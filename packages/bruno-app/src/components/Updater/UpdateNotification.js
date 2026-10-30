@@ -134,7 +134,22 @@ const UpdateNotification = () => {
     const percent = progress?.percent || 0;
     const transferredMB = progress?.transferred ? (progress.transferred / (1024 * 1024)).toFixed(1) : null;
     const totalMB = progress?.total ? (progress.total / (1024 * 1024)).toFixed(1) : null;
-    const tooltipText = totalMB ? `${transferredMB} MB dari ${totalMB} MB (${percent}%)` : `Mengunduh... ${percent}%`;
+    const speedMB = progress?.bytesPerSecond ? (progress.bytesPerSecond / (1024 * 1024)).toFixed(1) : null;
+    
+    // Calculate remaining time
+    let etaText = '';
+    if (progress?.bytesPerSecond > 0 && progress?.total > progress?.transferred) {
+      const remainingSec = Math.round((progress.total - progress.transferred) / progress.bytesPerSecond);
+      if (remainingSec > 60) {
+        etaText = ` • ${Math.ceil(remainingSec / 60)} mnt tersisa`;
+      } else {
+        etaText = ` • ${remainingSec} dtk tersisa`;
+      }
+    }
+
+    const tooltipText = totalMB
+      ? `${transferredMB} MB dari ${totalMB} MB (${percent}%)${speedMB ? ` • ${speedMB} MB/s` : ''}${etaText}`
+      : `Mengunduh... ${percent}%`;
 
     return (
       <StyledWrapper>
@@ -145,6 +160,7 @@ const UpdateNotification = () => {
           <span className="pulse-dot-cyan" />
           <span className="chip-label">Unduh v{availableVersion || ''}</span>
           <span className="percent-text">{percent}%</span>
+          {speedMB && <span className="speed-text">{speedMB} MB/s</span>}
           <div className="update-progress-bar">
             <div className="fill" style={{ width: `${percent}%` }} />
           </div>

@@ -1,5 +1,5 @@
 const { autoUpdater } = require('electron-updater');
-const { ipcMain, app } = require('electron');
+const { ipcMain, app, shell } = require('electron');
 const isDev = require('electron-is-dev');
 
 function registerUpdaterIpc(mainWindow) {
@@ -10,7 +10,8 @@ function registerUpdaterIpc(mainWindow) {
     releaseDate: null,
     releaseNotes: null,
     progress: null, // { percent, bytesPerSecond, transferred, total }
-    error: null
+    error: null,
+    lastCheckedAt: null
   };
 
   const broadcastState = () => {
@@ -82,6 +83,8 @@ function registerUpdaterIpc(mainWindow) {
   }
 
   const triggerCheckForUpdates = async (isManual = false) => {
+    updateState.lastCheckedAt = new Date().toISOString();
+
     if (isDev || !app.isPackaged) {
       console.log('[Updater] App is in development mode. Simulating update check...');
       updateState.status = 'checking';
@@ -91,7 +94,7 @@ function registerUpdaterIpc(mainWindow) {
         updateState.status = 'not-available';
         updateState.availableVersion = app.getVersion();
         broadcastState();
-      }, 1200);
+      }, 1000);
 
       return { status: 'dev-mode', version: app.getVersion() };
     }
@@ -120,6 +123,14 @@ function registerUpdaterIpc(mainWindow) {
     return triggerCheckForUpdates(true);
   });
 
+  ipcMain.handle('updater:open-download-page', (event, versionTag) => {
+    const url = versionTag
+      ? `https://github.com/nyawit-dev/ngaRing-Api/releases/tag/${versionTag.startsWith('v') ? versionTag : `v${versionTag}`}`
+      : 'https://github.com/nyawit-dev/ngaRing-Api/releases';
+    console.log('[Updater] Opening release page in external browser:', url);
+    shell.openExternal(url);
+  });
+
   ipcMain.handle('updater:start-download', async () => {
     console.log('[Updater] User requested download. Starting downloadUpdate()...');
     updateState.status = 'downloading';
@@ -130,15 +141,20 @@ function registerUpdaterIpc(mainWindow) {
         // Dev mode simulation of downloading progress
         let p = 0;
         const interval = setInterval(() => {
-          p += 25;
-          updateState.progress = { percent: p, bytesPerSecond: 2048000, transferred: p * 500000, total: 50000000 };
+          p += 20;
+          updateState.progress = {
+            percent: Math.min(100, p),
+            bytesPerSecond: 3145728, // 3 MB/s
+            transferred: (p / 100) * 58000000,
+            total: 58000000
+          };
           broadcastState();
           if (p >= 100) {
             clearInterval(interval);
             updateState.status = 'downloaded';
             broadcastState();
           }
-        }, 600);
+        }, 500);
         return { status: 'simulated' };
       }
       return await autoUpdater.downloadUpdate();

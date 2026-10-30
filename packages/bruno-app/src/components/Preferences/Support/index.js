@@ -73,6 +73,29 @@ const SUPPORT_GROUPS = [
 const Support = () => {
   const { t } = useTranslation();
   const [checking, setChecking] = useState(false);
+  const [updaterInfo, setUpdaterInfo] = useState({
+    status: 'idle',
+    lastCheckedAt: null,
+    availableVersion: null
+  });
+
+  React.useEffect(() => {
+    if (window.ipcRenderer) {
+      window.ipcRenderer.invoke('updater:get-status')
+        .then((state) => {
+          if (state) setUpdaterInfo(state);
+        })
+        .catch(() => {});
+
+      const removeListener = window.ipcRenderer.on('main:updater-status', (state) => {
+        if (state) setUpdaterInfo(state);
+      });
+
+      return () => {
+        if (typeof removeListener === 'function') removeListener();
+      };
+    }
+  }, []);
 
   const handleCheckUpdate = (e) => {
     e.preventDefault();
@@ -85,28 +108,68 @@ const Support = () => {
     }
   };
 
+  const handleOpenReleasePage = () => {
+    if (window.ipcRenderer) {
+      window.ipcRenderer.invoke('updater:open-download-page', updaterInfo.availableVersion);
+    }
+  };
+
+  const formatLastChecked = (isoString) => {
+    if (!isoString) return 'Belum diperiksa di sesi ini';
+    try {
+      const d = new Date(isoString);
+      return `Terakhir diperiksa: ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+    } catch {
+      return 'Baru saja diperiksa';
+    }
+  };
+
   return (
     <StyledWrapper className="w-full">
-      <div className="section-header">Support</div>
+      <div className="section-header">Support & Updates</div>
 
       <section className="support-group mb-4" aria-labelledby="support-updates-label">
         <h3 className="support-group-label select-none" id="support-updates-label">
-          Software Updates
+          Software Updates & Version Delivery
         </h3>
-        <div className="support-card p-3 flex flex-row items-center justify-between">
-          <div className="flex flex-col">
-            <span className="text-sm font-medium">NgaRingApi Desktop v{version}</span>
-            <span className="text-xs text-muted">Automatic background updates enabled</span>
+        <div className="support-card p-3.5 flex flex-col gap-3">
+          <div className="flex flex-row items-center justify-between">
+            <div className="flex flex-col gap-0.5">
+              <span className="text-sm font-semibold text-slate-100 flex items-center gap-2">
+                NgaRingApi Desktop v{version}
+                {updaterInfo.availableVersion && (
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                    Update v{updaterInfo.availableVersion} Tersedia
+                  </span>
+                )}
+              </span>
+              <span className="text-xs text-muted">
+                {formatLastChecked(updaterInfo.lastCheckedAt)} • Kanal Rilis Resmi GitHub
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                className="btn btn-sm btn-secondary flex items-center gap-1.5 text-xs"
+                onClick={handleOpenReleasePage}
+                title="Buka halaman rilis di GitHub"
+              >
+                <IconExternalLink size={13} />
+                <span>Changelog</span>
+              </button>
+
+              <button
+                type="button"
+                className="btn btn-sm btn-secondary flex items-center gap-1.5 text-xs"
+                onClick={handleCheckUpdate}
+                disabled={checking}
+              >
+                <IconRefresh size={13} className={checking ? 'animate-spin' : ''} />
+                <span>{checking ? 'Memeriksa...' : 'Check for Updates'}</span>
+              </button>
+            </div>
           </div>
-          <button
-            type="button"
-            className="btn btn-sm btn-secondary flex items-center gap-1.5"
-            onClick={handleCheckUpdate}
-            disabled={checking}
-          >
-            <IconRefresh size={14} className={checking ? 'animate-spin' : ''} />
-            <span>{checking ? 'Checking...' : 'Check for Updates'}</span>
-          </button>
         </div>
       </section>
 

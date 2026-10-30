@@ -67,6 +67,12 @@ const StyledWrapper = styled.div`
         color: #7dd3fc;
         font-variant-numeric: tabular-nums;
       }
+
+      .speed-text {
+        font-size: 10px;
+        color: rgba(125, 211, 252, 0.7);
+        font-variant-numeric: tabular-nums;
+      }
     }
 
     &.ready {
