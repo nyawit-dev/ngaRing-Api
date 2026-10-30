@@ -70,6 +70,27 @@ const StyledWrapper = styled.div`
     align-items: center;
     padding: 2px 6px;
   }
+
+  .status-bar-version-btn {
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: background-color 0.15s ease, color 0.15s ease;
+
+    .version-refresh-icon {
+      opacity: 0.6;
+      transition: transform 0.25s ease, opacity 0.2s ease;
+    }
+
+    &:hover {
+      background: ${(props) => props.theme.sidebar?.hoverBg || 'rgba(255, 255, 255, 0.06)'};
+      color: #38bdf8;
+
+      .version-refresh-icon {
+        opacity: 1;
+        transform: rotate(180deg);
+      }
+    }
+  }
 `;
 
 export default StyledWrapper;

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import find from 'lodash/find';
-import { IconSettings, IconCookie, IconTool, IconSearch, IconPalette, IconBrandGithub } from '@tabler/icons';
+import { IconSettings, IconCookie, IconTool, IconSearch, IconPalette, IconBrandGithub, IconRotateClockwise } from '@tabler/icons';
+import toast from 'react-hot-toast';
 import Mousetrap from 'mousetrap';
 import { getKeyBindingsForActionAllOS } from 'providers/Hotkeys/keyMappings';
 import ToolHint from 'components/ToolHint';
@@ -50,6 +51,16 @@ const StatusBar = () => {
     bindings.forEach((binding) => {
       Mousetrap.trigger(binding);
     });
+  };
+
+  const handleCheckUpdate = () => {
+    const { ipcRenderer } = window;
+    if (!ipcRenderer) return;
+    toast.loading('Memeriksa pembaruan ke GitHub Releases...', { id: 'manual-update-check' });
+    ipcRenderer.invoke('updater:check-for-updates')
+      .catch((err) => {
+        toast.error(`Gagal memeriksa pembaruan: ${err?.message || 'Error'}`, { id: 'manual-update-check' });
+      });
   };
 
   return (
@@ -162,9 +173,20 @@ const StatusBar = () => {
 
             <div className="status-bar-divider"></div>
 
-            <div className="status-bar-version">
-              v{version}
-            </div>
+            <ToolHint text="Periksa Pembaruan (Check for Updates)" toolhintId="CheckUpdate" place="top-end" offset={10}>
+              <button
+                className="status-bar-button status-bar-version-btn"
+                onClick={handleCheckUpdate}
+                tabIndex={0}
+                aria-label="Periksa Pembaruan Aplikasi"
+                title="Klik untuk periksa pembaruan aplikasi"
+              >
+                <div className="console-button-content">
+                  <IconRotateClockwise size={12} strokeWidth={1.8} className="version-refresh-icon" aria-hidden="true" />
+                  <span className="console-label">v{version}</span>
+                </div>
+              </button>
+            </ToolHint>
           </div>
         </div>
       </div>

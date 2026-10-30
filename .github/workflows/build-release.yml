@@ -62,7 +62,7 @@ jobs:
           - os: windows-latest
             platform: win
             artifact_name: NgaRingApi-Windows-Installer
-          - os: macos-15
+          - os: macos-14
             platform: mac
             artifact_name: NgaRingApi-macOS-Installer
           - os: ubuntu-latest

@@ -19,6 +19,35 @@ const StyledWrapper = styled.div`
     border: 1px solid transparent;
     line-height: 1;
 
+    &.check-btn {
+      background: ${(props) => props.theme.background?.surface0 || '#1e1e2e'};
+      border-color: ${(props) => props.theme.border?.border0 || '#313244'};
+      color: ${(props) => props.theme.text?.subtext0 || '#a6adc8'};
+      font-size: 11px;
+      padding: 0 9px;
+
+      &:hover {
+        background: ${(props) => props.theme.background?.surface1 || '#313244'};
+        color: ${(props) => props.theme.text || '#cdd6f4'};
+        border-color: ${(props) => props.theme.primary?.solid || '#eab308'};
+      }
+
+      .spinner {
+        animation: spin 1s linear infinite;
+        color: ${(props) => props.theme.primary?.solid || '#eab308'};
+      }
+    }
+
+    &.checking {
+      background: rgba(234, 179, 8, 0.12);
+      border-color: rgba(234, 179, 8, 0.35);
+      color: #eab308;
+
+      .spinner {
+        animation: spin 1s linear infinite;
+      }
+    }
+
     &.downloading {
       background: rgba(6, 182, 212, 0.1);
       border-color: rgba(6, 182, 212, 0.3);

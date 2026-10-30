@@ -75,6 +75,20 @@ const UpdateNotification = () => {
     }
   };
 
+  const handleCheckUpdate = (e) => {
+    e?.stopPropagation?.();
+    const { ipcRenderer } = window;
+    if (!ipcRenderer) return;
+
+    toastIdRef.current = toast.loading('Memeriksa pembaruan ke GitHub Releases...');
+    ipcRenderer.invoke('updater:check-for-updates')
+      .catch((err) => {
+        console.error('Check for updates error:', err);
+        toast.error(`Gagal memeriksa pembaruan: ${err?.message || 'Error'}`, { id: toastIdRef.current });
+        toastIdRef.current = null;
+      });
+  };
+
   const { status, availableVersion, progress } = updateState;
 
   if (status === 'downloading') {
@@ -108,7 +122,7 @@ const UpdateNotification = () => {
         <div
           className="update-chip ready"
           onClick={() => setShowModal(true)}
-          title="Klik untuk menerapkan pembaruan"
+          title="Klik untuk menerapkan pembaruan sekarang"
         >
           <IconBolt size={14} />
           <span>Update v{availableVersion} Siap</span>
@@ -117,7 +131,31 @@ const UpdateNotification = () => {
     );
   }
 
-  return null;
+  if (status === 'checking') {
+    return (
+      <StyledWrapper>
+        <div className="update-chip checking" title="Sedang memeriksa pembaruan...">
+          <IconRotateClockwise size={13} className="spinner" />
+          <span>Memeriksa...</span>
+        </div>
+      </StyledWrapper>
+    );
+  }
+
+  return (
+    <StyledWrapper>
+      <div
+        className="update-chip check-btn"
+        onClick={handleCheckUpdate}
+        title="Periksa Pembaruan Aplikasi (Check for Updates)"
+        role="button"
+        tabIndex={0}
+      >
+        <IconRotateClockwise size={12} strokeWidth={2} />
+        <span>Check Update</span>
+      </div>
+    </StyledWrapper>
+  );
 };
 
 export default UpdateNotification;
