@@ -1,41 +1,99 @@
 import React from 'react';
+import styled from 'styled-components';
 import Modal from 'components/Modal';
 import { IconBolt, IconCheck, IconDownload, IconAlertCircle, IconExternalLink, IconInfoCircle } from '@tabler/icons';
+import DOMPurify from 'dompurify';
+import MarkdownIt from 'markdown-it';
 
-const formatReleaseNotes = (notes) => {
-  if (!notes) return null;
-  if (typeof notes !== 'string') return notes;
+const md = new MarkdownIt({
+  html: true,
+  linkify: true,
+  breaks: true
+});
 
-  const lines = notes.split('\n');
-  return lines.map((line, idx) => {
-    const trimmed = line.trim();
-    if (!trimmed) return <div key={idx} className="h-1.5" />;
+const ReleaseNotesWrapper = styled.div`
+  font-size: 11px;
+  line-height: 1.6;
+  color: #cbd5e1;
 
-    if (trimmed.startsWith('###') || trimmed.startsWith('####')) {
-      const title = trimmed.replace(/^#+\s*/, '');
-      return (
-        <div key={idx} className="font-semibold text-xs text-slate-200 mt-2 mb-1 flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 inline-block" />
-          <span>{title}</span>
-        </div>
-      );
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    color: #f1f5f9;
+    margin-top: 8px;
+    margin-bottom: 4px;
+    line-height: 1.35;
+  }
+
+  h1, h2, h3, h4 {
+    font-size: 12px;
+    color: #38bdf8;
+    border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+    padding-bottom: 2px;
+  }
+
+  p {
+    margin-top: 4px;
+    margin-bottom: 6px;
+    color: #94a3b8;
+  }
+
+  ul, ol {
+    margin: 4px 0 8px 16px;
+    padding: 0;
+    list-style-type: disc;
+  }
+
+  li {
+    margin-top: 2px;
+    margin-bottom: 2px;
+    color: #cbd5e1;
+  }
+
+  strong {
+    color: #f8fafc;
+    font-weight: 600;
+  }
+
+  code {
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(51, 65, 85, 0.7);
+    color: #7dd3fc;
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 10px;
+  }
+
+  a {
+    color: #38bdf8;
+    text-decoration: none;
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+      color: #7dd3fc;
     }
+  }
+`;
 
-    if (trimmed.startsWith('-') || trimmed.startsWith('*')) {
-      const item = trimmed.replace(/^[-*]\s*/, '');
-      return (
-        <div key={idx} className="flex items-start gap-1.5 text-[11px] text-slate-300 ml-2 my-0.5 leading-relaxed">
-          <span className="text-cyan-400 select-none">•</span>
-          <span>{item}</span>
-        </div>
-      );
-    }
+const getSanitizedReleaseNotesHtml = (notes) => {
+  if (!notes) return '';
+  let rawText = '';
+  if (Array.isArray(notes)) {
+    rawText = notes.map((item) => (typeof item === 'string' ? item : item?.note || '')).join('\n\n');
+  } else if (typeof notes === 'string') {
+    rawText = notes;
+  } else {
+    rawText = String(notes);
+  }
 
-    return (
-      <p key={idx} className="text-[11px] text-slate-400 my-0.5 leading-relaxed">
-        {trimmed}
-      </p>
-    );
+  // GitHub releases atom feed provides full HTML (starts with <h1, <h2, <h3, <h4, <p, etc.)
+  const isHtml = /<\/?(h[1-6]|p|ul|ol|li|div|span|strong|em|code|a|br)[\s>]/i.test(rawText);
+  const htmlToSanitize = isHtml ? rawText : md.render(rawText);
+
+  return DOMPurify.sanitize(htmlToSanitize, {
+    ALLOWED_TAGS: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'ul', 'ol', 'li', 'strong', 'em', 'code', 'pre', 'a', 'br', 'span', 'hr'],
+    ALLOWED_ATTR: ['href', 'target', 'rel', 'class', 'title']
   });
 };
 
@@ -52,10 +110,21 @@ const UpdateModal = ({
   const isDownloading = mode === 'downloading';
   const isError = mode === 'error';
 
-  const handleOpenBrowser = () => {
+  const handleOpenBrowser = (targetUrl) => {
     const { ipcRenderer } = window;
+    const url = typeof targetUrl === 'string' ? targetUrl : version;
     if (ipcRenderer) {
-      ipcRenderer.invoke('updater:open-download-page', version);
+      ipcRenderer.invoke('updater:open-download-page', url);
+    } else {
+      window.open(typeof targetUrl === 'string' ? targetUrl : `https://github.com/nyawit-dev/ngaRing-Api/releases/tag/v${version || ''}`, '_blank');
+    }
+  };
+
+  const handleNotesClick = (e) => {
+    const link = e.target.closest('a');
+    if (link && link.href) {
+      e.preventDefault();
+      handleOpenBrowser(link.href);
     }
   };
 
@@ -107,6 +176,19 @@ const UpdateModal = ({
     }
   }
 
+  const releaseNotesHtml = getSanitizedReleaseNotesHtml(releaseNotes);
+
+  const getErrorMessage = () => {
+    if (!error) return 'Koneksi ke server rilis terganggu.';
+    if (error.includes('checksum mismatch')) {
+      return 'Terdapat perbedaan checksum berkas (proses unggah rilis baru sedang berlangsung di server GitHub). Silakan coba lagi beberapa saat lagi atau unduh installer resmi secara manual.';
+    }
+    if (error.includes('digitally signed') || error.includes('signature')) {
+      return 'Sertifikat digital untuk build komunitas Windows sedang disesuaikan. Silakan gunakan installer manual via browser.';
+    }
+    return error;
+  };
+
   return (
     <Modal
       size="sm"
@@ -145,7 +227,7 @@ const UpdateModal = ({
           <button
             type="button"
             className="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1 cursor-pointer transition-colors"
-            onClick={handleOpenBrowser}
+            onClick={() => handleOpenBrowser()}
             title="Buka rilis lengkap di GitHub Releases"
           >
             <span>GitHub Release</span>
@@ -201,17 +283,20 @@ const UpdateModal = ({
           <>
             <p className="text-xs leading-relaxed text-slate-400">
               {isError
-                ? `Terjadi kendala saat mengunduh pembaruan (${error || 'Koneksi terganggu'}). Anda dapat mengunduh installer resmi terbaru secara langsung melalui GitHub Releases.`
+                ? `Terjadi kendala saat memeriksa atau mengunduh pembaruan: ${getErrorMessage()}`
                 : isDownload
                 ? 'Versi terbaru NgaRingApi telah tersedia dengan peningkatan performa, perbaikan bug, dan fitur terkini. Apakah Anda ingin mengunduh pembaruan ini sekarang?'
                 : 'Pembaruan versi terbaru telah selesai diunduh 100%. Aplikasi akan menutup sejenak dan membuka kembali dengan versi terbaru.'}
             </p>
 
             {/* Release Notes Card */}
-            {releaseNotes && !isError && (
-              <div className="p-3 rounded-lg bg-slate-800/80 border border-slate-700/60 text-xs text-slate-300 max-h-40 overflow-y-auto">
+            {releaseNotesHtml && !isError && (
+              <div className="p-3 rounded-lg bg-slate-800/80 border border-slate-700/60 text-xs text-slate-300 max-h-44 overflow-y-auto">
                 <span className="font-semibold block mb-1 text-slate-200">Catatan Pembaruan:</span>
-                {formatReleaseNotes(releaseNotes)}
+                <ReleaseNotesWrapper
+                  onClick={handleNotesClick}
+                  dangerouslySetInnerHTML={{ __html: releaseNotesHtml }}
+                />
               </div>
             )}
 
