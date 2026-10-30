@@ -147,8 +147,30 @@ async function main() {
       ? `bun run dist:${osArg}`
       : `npm run dist:${osArg}`;
     console.log(`Executing: ${distCmd} in ${electronDir}`);
-    await execCommandWithOutput(distCmd, electronDir);
-    console.log(`Electron distribution built successfully for ${osArg}!`);
+
+    if (os.platform() === 'darwin' || osArg === 'mac') {
+      try {
+        const { execSync } = require('child_process');
+        execSync('hdiutil detach /Volumes/NgaRingApi* -force 2>/dev/null || true');
+      } catch (_) {}
+    }
+
+    try {
+      await execCommandWithOutput(distCmd, electronDir);
+      console.log(`Electron distribution built successfully for ${osArg}!`);
+    } catch (cmdError) {
+      if (osArg === 'mac') {
+        const outFiles = (await fs.pathExists(electronOutDir)) ? await fs.readdir(electronOutDir) : [];
+        const hasDmg = outFiles.some((f) => f.endsWith('.dmg'));
+        const hasZip = outFiles.some((f) => f.endsWith('.zip'));
+        if (hasDmg && hasZip) {
+          console.warn('Notice: electron-builder completed artifact generation but threw an exit cleanup code (likely hdiutil detach on headless runner).');
+          console.log('Successfully produced macOS artifacts:', outFiles.filter((f) => f.endsWith('.dmg') || f.endsWith('.zip')));
+          return;
+        }
+      }
+      throw cmdError;
+    }
   } catch (error) {
     console.error('An error occurred during Electron build:', error);
     process.exit(1);

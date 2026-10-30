@@ -106,10 +106,12 @@ jobs:
             echo "Web build successfully restored from artifact."
           fi
 
-      - name: Disable Spotlight on macOS
+      - name: Disable Spotlight and Clean Mounts on macOS
         if: runner.os == 'macOS'
         run: |
           sudo mdutil -a -i off || true
+          hdiutil detach /Volumes/NgaRingApi* -force 2>/dev/null || true
+          rm -rf /Volumes/NgaRingApi* 2>/dev/null || true
 
       - name: Build Desktop Application
         run: node ./scripts/build-electron.js ${{ matrix.platform }}
@@ -118,6 +120,7 @@ jobs:
           CSC_IDENTITY_AUTO_DISCOVERY: false
 
       - name: Upload Desktop Artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact_name }}

@@ -65,7 +65,7 @@ const config = {
     ]
   },
   dmg: {
-    title: 'NgaRingApi ${version}',
+    title: '${productName} ${version} ${arch}',
     icon: 'resources/icons/mac/icon.icns',
     sign: false,
     writeUpdateInfo: false
