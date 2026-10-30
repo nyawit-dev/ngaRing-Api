@@ -1,0 +1,30 @@
+{
+  "version": "1.0",
+  "updatedAt": "2026-10-30T10:00:00.000Z",
+  "notifications": [
+    {
+      "id": "ngaringapi-v217-announcement",
+      "type": "NgaRingApi",
+      "source": "NgaRingApi",
+      "pinned": true,
+      "ignoreInstallDate": true,
+      "title": "NgaRingApi v2.1.7 Resmi Dirilis! 🚀",
+      "description": "### Selamat Datang di NgaRingApi v2.1.7\n\nNgaRingApi adalah IDE API lokal-pertama (Local-First API IDE) yang cepat, aman, dan ramah Git, dibangun serta dimodifikasi secara ekstensif berbasis repositori open-source **[Bruno](https://github.com/usebruno/bruno)**.\n\n#### ✨ Peningkatan Terbaru di v2.1.7:\n- **Tautan Repositori Resmi**: Tombol GitHub di status bar kini langsung mengarah ke `https://github.com/nyawit-dev/ngaRing-Api`.\n- **Multi-Source Notification Engine**: Menerima pengumuman resmi dari kanal nyawit.dev (`notifications.json`) sekaligus mempertahankan feed komunitas Bruno upstream, lengkap dengan pengaturan kustom di Preferences.\n- **Pusat Informasi About NgaRingApi**: Halaman About baru yang elegan dan transparan menjabarkan secara detail bahwa NgaRingApi adalah modifikasi open-source dari repositori upstream Bruno.\n- **Pusat Pengecekan Versi Tunggal**: Pengecekan update kini terpusat elegan hanya di pojok kanan bawah layar.\n\nKunjungi repositori resmi kami di [nyawit-dev/ngaRing-Api](https://github.com/nyawit-dev/ngaRing-Api) untuk dokumentasi dan rilis terbaru!",
+      "color": "#00f0ff",
+      "date": "2026-10-30T10:00:00.000Z",
+      "active": true
+    },
+    {
+      "id": "ngaringapi-custom-feed-tip",
+      "type": "Tips & Trik",
+      "source": "NgaRingApi",
+      "pinned": false,
+      "ignoreInstallDate": true,
+      "title": "Cara Mengirimkan Notifikasi ke Pengguna NgaRingApi 📢",
+      "description": "### Kirim Pengumuman & Notifikasi Sendiri!\n\nSebagai pengembang atau administrator, Anda dapat mempublikasikan notifikasi langsung ke seluruh instalasi NgaRingApi:\n\n1. Buka berkas `notifications.json` di repositori [GitHub nyawit-dev/ngaRing-Api](https://github.com/nyawit-dev/ngaRing-Api).\n2. Tambahkan entri notifikasi baru dengan format id, title, description (Markdown didukung), date, dan color.\n3. Lakukan commit dan push ke branch `main`.\n4. Seluruh pengguna aplikasi NgaRingApi akan otomatis menerima notifikasi tersebut!\n\nAnda juga dapat mengatur URL feed kustom di **Preferences -> Support & Updates**.",
+      "color": "#38bdf8",
+      "date": "2026-10-30T09:30:00.000Z",
+      "active": true
+    }
+  ]
+}

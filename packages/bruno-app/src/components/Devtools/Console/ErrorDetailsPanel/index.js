@@ -67,7 +67,7 @@ ${error.args ? error.args.map((arg, index) => {
     const encodedTitle = encodeURIComponent(title);
     const encodedBody = encodeURIComponent(body);
 
-    return `https://github.com/usebruno/bruno/issues/new?template=BLANK_ISSUE&title=${encodedTitle}&body=${encodedBody}`;
+    return `https://github.com/nyawit-dev/ngaRing-Api/issues/new?template=BLANK_ISSUE&title=${encodedTitle}&body=${encodedBody}`;
   };
 
   const handleReportIssue = () => {

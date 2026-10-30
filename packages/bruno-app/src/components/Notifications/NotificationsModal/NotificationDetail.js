@@ -34,6 +34,11 @@ const NotificationDetail = ({ notification }) => {
     <div className="notif-detail">
       <div className="notif-detail-header">
         <div className="notif-detail-meta">
+          {notification.source && (
+            <span className="notif-source-badge text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
+              {notification.source === 'NgaRingApi' ? '🌐 NgaRingApi' : '📦 Bruno'}
+            </span>
+          )}
           {notification.type && (
             <span className="notif-type-badge" style={getBadgeStyle(notification.color, theme)}>
               {notification.type}

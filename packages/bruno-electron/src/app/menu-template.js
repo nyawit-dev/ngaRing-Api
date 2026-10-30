@@ -1,6 +1,5 @@
-const { ipcMain } = require('electron');
+const { ipcMain, BrowserWindow, shell } = require('electron');
 const os = require('os');
-const { BrowserWindow } = require('electron');
 const { version } = require('../../package.json');
 const aboutBruno = require('./about-bruno');
 
@@ -96,26 +95,30 @@ const template = [
     role: 'help',
     submenu: [
       {
-        label: 'Check for Updates...',
-        click: () => {
-          ipcMain.emit('menu:check-for-updates');
-        }
-      },
-      { type: 'separator' },
-      {
         label: 'About NgaRingApi',
         click: () => {
           const aboutWindow = new BrowserWindow({
-            width: 350,
-            height: 250,
+            width: 540,
+            height: 620,
+            resizable: true,
+            minWidth: 460,
+            minHeight: 500,
+            maximizable: false,
+            title: 'About NgaRingApi',
+            backgroundColor: '#0b0f17',
             webPreferences: {
               nodeIntegration: true
             }
           });
           aboutWindow.removeMenu();
+          aboutWindow.webContents.setWindowOpenHandler(({ url }) => {
+            shell.openExternal(url);
+            return { action: 'deny' };
+          });
           aboutWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(aboutBruno({ version }))}`);
         }
       },
+      { type: 'separator' },
       { label: 'Documentation', click: () => ipcMain.emit('main:open-docs') }
     ]
   }

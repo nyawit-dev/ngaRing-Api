@@ -352,13 +352,23 @@ app.on('ready', async () => {
     const { version } = require('../package.json');
     const aboutBruno = require('./app/about-bruno');
     const aboutWindow = new BrowserWindow({
-      width: 350,
-      height: 250,
+      width: 540,
+      height: 620,
+      resizable: true,
+      minWidth: 460,
+      minHeight: 500,
+      maximizable: false,
+      title: 'About NgaRingApi',
+      backgroundColor: '#0b0f17',
       webPreferences: {
         nodeIntegration: true
       }
     });
     aboutWindow.removeMenu();
+    aboutWindow.webContents.setWindowOpenHandler(({ url }) => {
+      shell.openExternal(url);
+      return { action: 'deny' };
+    });
     aboutWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(aboutBruno({ version }))}`);
   });
 
@@ -390,7 +400,7 @@ app.on('ready', async () => {
       } else {
         console.error(
           'If you are using an official production build: the above error is most likely a bug! '
-          + ' Please report this under: https://github.com/usebruno/bruno/issues'
+          + ' Please report this under: https://github.com/nyawit-dev/ngaRing-Api/issues'
         );
       }
     });

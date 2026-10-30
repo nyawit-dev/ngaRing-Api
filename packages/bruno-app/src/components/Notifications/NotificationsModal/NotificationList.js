@@ -22,6 +22,20 @@ const NotificationList = ({ items, selectedId, onSelect }) => {
               }
             }}
           >
+            {(notification.source === 'NgaRingApi' || notification.pinned) && (
+              <div className="flex items-center gap-1 mb-1">
+                {notification.source === 'NgaRingApi' && (
+                  <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 uppercase tracking-wider">
+                    NgaRingApi
+                  </span>
+                )}
+                {notification.pinned && (
+                  <span className="text-[9px] font-medium px-1 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                    📌 Penting
+                  </span>
+                )}
+              </div>
+            )}
             <div className={classnames('notif-item-title', { unread: isUnread })}>{notification.title}</div>
             <div className="notif-item-date">{relativeDate(notification.date)}</div>
           </li>

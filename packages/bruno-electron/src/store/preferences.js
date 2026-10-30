@@ -103,6 +103,11 @@ const defaultPreferences = {
       customRedactedHeaders: [],
       customRedactedVariables: []
     }
+  },
+  notifications: {
+    enableBruno: true,
+    enableCustom: true,
+    customUrl: 'https://raw.githubusercontent.com/nyawit-dev/ngaRing-Api/main/notifications.json'
   }
 };
 
@@ -235,6 +240,11 @@ const preferencesSchema = Yup.object().shape({
       customRedactedHeaders: Yup.array().of(Yup.string().max(200)).max(200),
       customRedactedVariables: Yup.array().of(Yup.string().max(200)).max(200)
     }).optional()
+  }).optional(),
+  notifications: Yup.object({
+    enableBruno: Yup.boolean().optional(),
+    enableCustom: Yup.boolean().optional(),
+    customUrl: Yup.string().max(2048).nullable().optional()
   }).optional()
 });
 
