@@ -9,13 +9,13 @@ const StyledWrapper = styled.div`
     align-items: center;
     gap: 6px;
     height: 24px;
-    padding: 0 8px;
+    padding: 0 10px;
     font-size: 11px;
     font-weight: 500;
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
     user-select: none;
-    transition: all 120ms ease;
+    transition: all 140ms ease;
     border: 1px solid transparent;
     line-height: 1;
 
@@ -24,73 +24,135 @@ const StyledWrapper = styled.div`
       border-color: ${(props) => props.theme.border?.border0 || '#313244'};
       color: ${(props) => props.theme.text?.subtext0 || '#a6adc8'};
       font-size: 11px;
-      padding: 0 9px;
 
       &:hover {
         background: ${(props) => props.theme.background?.surface1 || '#313244'};
         color: ${(props) => props.theme.text || '#cdd6f4'};
         border-color: ${(props) => props.theme.primary?.solid || '#eab308'};
       }
-
-      .spinner {
-        animation: spin 1s linear infinite;
-        color: ${(props) => props.theme.primary?.solid || '#eab308'};
-      }
     }
 
     &.checking {
-      background: rgba(234, 179, 8, 0.12);
-      border-color: rgba(234, 179, 8, 0.35);
+      background: rgba(234, 179, 8, 0.08);
+      border-color: rgba(234, 179, 8, 0.28);
       color: #eab308;
+      cursor: default;
+    }
 
-      .spinner {
-        animation: spin 1s linear infinite;
+    &.available {
+      background: rgba(234, 179, 8, 0.14);
+      border-color: rgba(234, 179, 8, 0.4);
+      color: #facc15;
+      font-weight: 600;
+
+      &:hover {
+        background: rgba(234, 179, 8, 0.22);
+        border-color: #facc15;
       }
     }
 
     &.downloading {
-      background: rgba(6, 182, 212, 0.1);
-      border-color: rgba(6, 182, 212, 0.3);
-      color: #00f0ff;
+      background: rgba(14, 165, 233, 0.1);
+      border-color: rgba(14, 165, 233, 0.35);
+      color: #38bdf8;
+      cursor: default;
 
-      .spinner {
-        animation: spin 1s linear infinite;
+      .chip-label {
+        font-weight: 500;
+      }
+
+      .percent-text {
+        font-size: 10px;
+        font-weight: 700;
+        color: #7dd3fc;
+        font-variant-numeric: tabular-nums;
       }
     }
 
     &.ready {
-      background: #0284c7;
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
       color: #ffffff;
-      border-color: #00f0ff;
-      box-shadow: 0 0 8px rgba(0, 240, 255, 0.25);
+      border-color: #38bdf8;
+      font-weight: 600;
+      box-shadow: 0 0 10px rgba(14, 165, 233, 0.35);
+      animation: readyPulse 2.5s infinite;
 
       &:hover {
-        background: #0369a1;
+        background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
       }
     }
   }
 
+  .pulse-dot-amber {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #eab308;
+    box-shadow: 0 0 0 rgba(234, 179, 8, 0.4);
+    animation: amberPulse 1.6s infinite ease-out;
+  }
+
+  .pulse-dot-cyan {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #38bdf8;
+    box-shadow: 0 0 0 rgba(56, 189, 248, 0.4);
+    animation: cyanPulse 1.6s infinite ease-out;
+  }
+
   .update-progress-bar {
-    width: 32px;
-    height: 3px;
-    background: rgba(255, 255, 255, 0.15);
+    width: 44px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.12);
     border-radius: 2px;
     overflow: hidden;
-    margin-left: 2px;
+    margin-left: 4px;
 
     .fill {
       height: 100%;
-      background: #00f0ff;
-      transition: width 200ms ease;
+      background: linear-gradient(90deg, #38bdf8, #06b6d4);
+      border-radius: 2px;
+      transition: width 150ms ease-out;
     }
   }
 
-  @keyframes spin {
-    from {
-      transform: rotate(0deg);
+  @keyframes amberPulse {
+    0% {
+      transform: scale(0.9);
+      box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.7);
     }
-    to {
-      transform: rotate(360deg);
+    70% {
+      transform: scale(1.15);
+      box-shadow: 0 0 0 5px rgba(234, 179, 8, 0);
+    }
+    100% {
+      transform: scale(0.9);
+      box-shadow: 0 0 0 0 rgba(234, 179, 8, 0);
+    }
+  }
+
+  @keyframes cyanPulse {
+    0% {
+      transform: scale(0.9);
+      box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7);
+    }
+    70% {
+      transform: scale(1.15);
+      box-shadow: 0 0 0 5px rgba(56, 189, 248, 0);
+    }
+    100% {
+      transform: scale(0.9);
+      box-shadow: 0 0 0 0 rgba(56, 189, 248, 0);
+    }
+  }
+
+  @keyframes readyPulse {
+    0%, 100% {
+      box-shadow: 0 0 6px rgba(14, 165, 233, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 12px rgba(14, 165, 233, 0.6);
     }
   }
 `;

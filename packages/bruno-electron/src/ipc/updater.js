@@ -22,7 +22,7 @@ function registerUpdaterIpc(mainWindow) {
   try {
     // Configure logger
     autoUpdater.logger = console;
-    autoUpdater.autoDownload = true;
+    autoUpdater.autoDownload = false;
     autoUpdater.autoInstallOnAppQuit = true;
 
     // Listeners from electron-updater
@@ -120,12 +120,44 @@ function registerUpdaterIpc(mainWindow) {
     return triggerCheckForUpdates(true);
   });
 
+  ipcMain.handle('updater:start-download', async () => {
+    console.log('[Updater] User requested download. Starting downloadUpdate()...');
+    updateState.status = 'downloading';
+    updateState.progress = { percent: 0, bytesPerSecond: 0, transferred: 0, total: 0 };
+    broadcastState();
+    try {
+      if (isDev || !app.isPackaged) {
+        // Dev mode simulation of downloading progress
+        let p = 0;
+        const interval = setInterval(() => {
+          p += 25;
+          updateState.progress = { percent: p, bytesPerSecond: 2048000, transferred: p * 500000, total: 50000000 };
+          broadcastState();
+          if (p >= 100) {
+            clearInterval(interval);
+            updateState.status = 'downloaded';
+            broadcastState();
+          }
+        }, 600);
+        return { status: 'simulated' };
+      }
+      return await autoUpdater.downloadUpdate();
+    } catch (downloadErr) {
+      console.error('[Updater] Download error:', downloadErr.message);
+      updateState.status = 'error';
+      updateState.error = downloadErr.message;
+      broadcastState();
+      throw downloadErr;
+    }
+  });
+
   ipcMain.handle('updater:quit-and-install', () => {
     console.log('[Updater] Quitting and installing update...');
     try {
       autoUpdater.quitAndInstall(false, true);
     } catch (quitErr) {
       console.error('[Updater] Failed to quit and install:', quitErr);
+      app.relaunch();
       app.quit();
     }
   });

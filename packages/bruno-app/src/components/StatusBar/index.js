@@ -124,6 +124,22 @@ const StatusBar = () => {
                 <IconBrandGithub size={16} strokeWidth={1.5} aria-hidden="true" />
               </button>
             </ToolHint>
+
+            <div className="status-bar-divider" style={{ margin: '0 4px' }} />
+
+            <ToolHint text="Klik untuk Periksa Pembaruan Aplikasi" toolhintId="CheckUpdateBottomLeft" place="top-start" offset={10}>
+              <button
+                className="status-bar-button status-bar-version-btn"
+                onClick={handleCheckUpdate}
+                tabIndex={0}
+                aria-label="Periksa Pembaruan Aplikasi"
+                title="Klik untuk periksa pembaruan aplikasi"
+              >
+                <div className="console-button-content">
+                  <span className="console-label font-medium">v{version}</span>
+                </div>
+              </button>
+            </ToolHint>
           </div>
         </div>
 
