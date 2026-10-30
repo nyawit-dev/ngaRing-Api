@@ -1,17 +1,17 @@
 {
   "version": "1.0",
-  "updatedAt": "2026-10-30T10:00:00.000Z",
+  "updatedAt": "2026-10-30T11:15:00.000Z",
   "notifications": [
     {
-      "id": "ngaringapi-v217-announcement",
+      "id": "ngaringapi-v218-announcement",
       "type": "NgaRingApi",
       "source": "NgaRingApi",
       "pinned": true,
       "ignoreInstallDate": true,
-      "title": "NgaRingApi v2.1.7 Resmi Dirilis! 🚀",
-      "description": "### Selamat Datang di NgaRingApi v2.1.7\n\nNgaRingApi adalah IDE API lokal-pertama (Local-First API IDE) yang cepat, aman, dan ramah Git, dibangun serta dimodifikasi secara ekstensif berbasis repositori open-source **[Bruno](https://github.com/usebruno/bruno)**.\n\n#### ✨ Peningkatan Terbaru di v2.1.7:\n- **Tautan Repositori Resmi**: Tombol GitHub di status bar kini langsung mengarah ke `https://github.com/nyawit-dev/ngaRing-Api`.\n- **Multi-Source Notification Engine**: Menerima pengumuman resmi dari kanal nyawit.dev (`notifications.json`) sekaligus mempertahankan feed komunitas Bruno upstream, lengkap dengan pengaturan kustom di Preferences.\n- **Pusat Informasi About NgaRingApi**: Halaman About baru yang elegan dan transparan menjabarkan secara detail bahwa NgaRingApi adalah modifikasi open-source dari repositori upstream Bruno.\n- **Pusat Pengecekan Versi Tunggal**: Pengecekan update kini terpusat elegan hanya di pojok kanan bawah layar.\n\nKunjungi repositori resmi kami di [nyawit-dev/ngaRing-Api](https://github.com/nyawit-dev/ngaRing-Api) untuk dokumentasi dan rilis terbaru!",
+      "title": "NgaRingApi v2.1.8 Resmi Dirilis! 🚀",
+      "description": "### Selamat Datang di NgaRingApi v2.1.8\n\nNgaRingApi adalah IDE API lokal-pertama (Local-First API IDE) yang cepat, aman, dan ramah Git, dibangun serta dimodifikasi secara ekstensif berbasis repositori open-source **[Bruno](https://github.com/usebruno/bruno)**.\n\n#### ✨ Peningkatan Terbaru di v2.1.8:\n- **Perbaikan Digital Signature Windows**: Bypass verifikasi Authenticode untuk rilis open-source komunitas sehingga auto-updater berjalan lancar tanpa error `not digitally signed`.\n- **Modal Dialog Unduhan Khusus**: Tampilan unduhan pembaruan kini rapi di dalam dialog modal tersendiri dengan bar animasi, persentase akurat, kecepatan transfer, dan estimasi waktu sisa.\n- **Status Bar Bersih**: Indikator status bar tetap ringkas dan elegan tanpa pergeseran layout yang ramai.\n- **Opsi Latar Belakang**: Pengguna dapat meminimalkan dialog unduhan ke latar belakang dan melanjutkan pengujian API dengan normal.\n\nKunjungi repositori resmi kami di [nyawit-dev/ngaRing-Api](https://github.com/nyawit-dev/ngaRing-Api) untuk dokumentasi dan rilis terbaru!",
       "color": "#00f0ff",
-      "date": "2026-10-30T10:00:00.000Z",
+      "date": "2026-10-30T11:15:00.000Z",
       "active": true
     },
     {

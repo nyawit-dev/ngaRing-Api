@@ -26,6 +26,18 @@ function registerUpdaterIpc(mainWindow) {
     autoUpdater.autoDownload = false;
     autoUpdater.autoInstallOnAppQuit = true;
 
+    // Disable Authenticode signature validation for open-source / community releases
+    try {
+      autoUpdater.verifySignature = () => Promise.resolve(null);
+      autoUpdater.verifyUpdateCodeSignature = () => Promise.resolve(null);
+      const proto = Object.getPrototypeOf(autoUpdater);
+      if (proto && typeof proto.verifySignature === 'function') {
+        proto.verifySignature = () => Promise.resolve(null);
+      }
+    } catch (sigErr) {
+      console.warn('[Updater] Could not patch verifySignature:', sigErr.message);
+    }
+
     // Listeners from electron-updater
     autoUpdater.on('checking-for-update', () => {
       console.log('[Updater] Checking for update...');

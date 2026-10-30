@@ -62,25 +62,18 @@ const StyledWrapper = styled.div`
     }
 
     &.downloading {
-      background: rgba(14, 165, 233, 0.1);
-      border-color: rgba(14, 165, 233, 0.35);
+      background: rgba(14, 165, 233, 0.12);
+      border-color: rgba(14, 165, 233, 0.4);
       color: #38bdf8;
-      cursor: default;
+      cursor: pointer;
+
+      &:hover {
+        background: rgba(14, 165, 233, 0.22);
+        border-color: #38bdf8;
+      }
 
       .chip-label {
         font-weight: 500;
-      }
-
-      .percent-text {
-        font-size: 10px;
-        font-weight: 700;
-        color: #7dd3fc;
-        font-variant-numeric: tabular-nums;
-      }
-
-      .speed-text {
-        font-size: 10px;
-        color: rgba(125, 211, 252, 0.7);
         font-variant-numeric: tabular-nums;
       }
     }

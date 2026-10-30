@@ -134,7 +134,6 @@ const config = {
       }
     ],
     sign: null,
-    publisherName: 'nyawit.dev',
     legalTrademarks: 'nyawit.dev'
   },
   nsis: {

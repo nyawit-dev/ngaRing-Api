@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { IconBolt, IconDownload, IconCheck, IconRotateClockwise } from '@tabler/icons';
+import { IconBolt, IconRotateClockwise } from '@tabler/icons';
 import toast from 'react-hot-toast';
 import { useApp } from 'providers/App';
 import StyledWrapper from './StyledWrapper';
@@ -16,7 +16,7 @@ const UpdateNotification = () => {
     error: null
   });
   const [showModal, setShowModal] = useState(false);
-  const [modalMode, setModalMode] = useState('install'); // 'download' | 'install'
+  const [modalMode, setModalMode] = useState('install'); // 'download' | 'downloading' | 'install' | 'error'
   const isManualCheckRef = useRef(false);
 
   useEffect(() => {
@@ -34,6 +34,8 @@ const UpdateNotification = () => {
           } else if (state.status === 'available') {
             setModalMode('download');
             setShowModal(true);
+          } else if (state.status === 'downloading') {
+            setModalMode('downloading');
           }
         }
       })
@@ -66,6 +68,8 @@ const UpdateNotification = () => {
         // User decision gate: Prompt before downloading
         setModalMode('download');
         setShowModal(true);
+      } else if (state.status === 'downloading') {
+        setModalMode('downloading');
       } else if (state.status === 'downloaded') {
         if (isManualCheckRef.current) {
           toast.dismiss('manual-update-toast');
@@ -76,6 +80,7 @@ const UpdateNotification = () => {
         setShowModal(true);
         toast.success(`Pembaruan v${state.availableVersion} berhasil diunduh dan siap dipasang!`, { duration: 5000 });
       } else if (state.status === 'error') {
+        setModalMode('error');
         if (isManualCheckRef.current) {
           toast.error(`Pemeriksaan pembaruan gagal: ${state.error || 'Koneksi error'}`, {
             id: 'manual-update-toast',
@@ -94,12 +99,15 @@ const UpdateNotification = () => {
   }, []);
 
   const handleStartDownload = () => {
-    setShowModal(false);
+    // Keep modal open in downloading mode so progress is displayed in dialog
+    setModalMode('downloading');
+    setShowModal(true);
     const { ipcRenderer } = window;
     if (ipcRenderer) {
-      toast('Memulai pengunduhan pembaruan...', { icon: '📥', duration: 3000 });
       ipcRenderer.invoke('updater:start-download').catch((err) => {
         console.error('Start download error:', err);
+        setModalMode('error');
+        setShowModal(true);
         toast.error(`Gagal mengunduh pembaruan: ${err?.message || 'Error'}`);
       });
     }
@@ -129,60 +137,39 @@ const UpdateNotification = () => {
       });
   };
 
-  const { status, availableVersion, progress, releaseNotes } = updateState;
+  const { status, availableVersion, progress, releaseNotes, error } = updateState;
+  const displayVersion = updateState.currentVersion || version;
 
-  // Active Download Progress UI
-  if (status === 'downloading') {
-    const percent = progress?.percent || 0;
-    const transferredMB = progress?.transferred ? (progress.transferred / (1024 * 1024)).toFixed(1) : null;
-    const totalMB = progress?.total ? (progress.total / (1024 * 1024)).toFixed(1) : null;
-    const speedMB = progress?.bytesPerSecond ? (progress.bytesPerSecond / (1024 * 1024)).toFixed(1) : null;
-    
-    // Calculate remaining time
-    let etaText = '';
-    if (progress?.bytesPerSecond > 0 && progress?.total > progress?.transferred) {
-      const remainingSec = Math.round((progress.total - progress.transferred) / progress.bytesPerSecond);
-      if (remainingSec > 60) {
-        etaText = ` • ${Math.ceil(remainingSec / 60)} mnt tersisa`;
-      } else {
-        etaText = ` • ${remainingSec} dtk tersisa`;
-      }
-    }
+  return (
+    <StyledWrapper>
+      {showModal && (
+        <UpdateModal
+          version={availableVersion}
+          mode={modalMode}
+          progress={progress}
+          releaseNotes={releaseNotes}
+          error={error}
+          onClose={() => setShowModal(false)}
+          onConfirm={modalMode === 'download' ? handleStartDownload : handleInstall}
+        />
+      )}
 
-    const tooltipText = totalMB
-      ? `${transferredMB} MB dari ${totalMB} MB (${percent}%)${speedMB ? ` • ${speedMB} MB/s` : ''}${etaText}`
-      : `Mengunduh... ${percent}%`;
-
-    return (
-      <StyledWrapper>
+      {/* Status Bar Chip */}
+      {status === 'downloading' ? (
         <div
-          className="update-chip downloading"
-          title={tooltipText}
+          className="update-chip downloading cursor-pointer"
+          onClick={() => {
+            setModalMode('downloading');
+            setShowModal(true);
+          }}
+          title="Klik untuk membuka dialog proses unduhan"
+          role="button"
+          tabIndex={0}
         >
           <span className="pulse-dot-cyan" />
-          <span className="chip-label">Unduh v{availableVersion || ''}</span>
-          <span className="percent-text">{percent}%</span>
-          {speedMB && <span className="speed-text">{speedMB} MB/s</span>}
-          <div className="update-progress-bar">
-            <div className="fill" style={{ width: `${percent}%` }} />
-          </div>
+          <span className="chip-label">Unduh v{availableVersion || ''} ({progress?.percent ?? 0}%)</span>
         </div>
-      </StyledWrapper>
-    );
-  }
-
-  // Download Complete - Ready to Install UI
-  if (status === 'downloaded') {
-    return (
-      <StyledWrapper>
-        {showModal && (
-          <UpdateModal
-            version={availableVersion}
-            mode="install"
-            onClose={() => setShowModal(false)}
-            onConfirm={handleInstall}
-          />
-        )}
+      ) : status === 'downloaded' ? (
         <div
           className="update-chip ready"
           onClick={() => {
@@ -190,27 +177,13 @@ const UpdateNotification = () => {
             setShowModal(true);
           }}
           title="Pembaruan siap dipasang. Klik untuk menerapkan sekarang!"
+          role="button"
+          tabIndex={0}
         >
           <IconBolt size={14} />
           <span>Pasang v{availableVersion}</span>
         </div>
-      </StyledWrapper>
-    );
-  }
-
-  // Update Available (Pending User Decision) UI
-  if (status === 'available') {
-    return (
-      <StyledWrapper>
-        {showModal && (
-          <UpdateModal
-            version={availableVersion}
-            mode="download"
-            releaseNotes={releaseNotes}
-            onClose={() => setShowModal(false)}
-            onConfirm={handleStartDownload}
-          />
-        )}
+      ) : status === 'available' ? (
         <div
           className="update-chip available"
           onClick={() => {
@@ -218,42 +191,30 @@ const UpdateNotification = () => {
             setShowModal(true);
           }}
           title="Versi baru tersedia! Klik untuk melihat dan mengunduh."
+          role="button"
+          tabIndex={0}
         >
           <span className="pulse-dot-amber" />
           <span>Update v{availableVersion} Tersedia</span>
         </div>
-      </StyledWrapper>
-    );
-  }
-
-  // Checking Status UI (Pulse Dot - No Spinning Icon)
-  if (status === 'checking') {
-    return (
-      <StyledWrapper>
+      ) : status === 'checking' ? (
         <div className="update-chip checking" title="Sedang memeriksa versi terbaru di GitHub Releases...">
           <span className="pulse-dot-amber" />
           <span>Memeriksa Versi...</span>
         </div>
-      </StyledWrapper>
-    );
-  }
-
-  // Default: Version badge & Check Update button (Single bottom-right entry point)
-  const displayVersion = updateState.currentVersion || version;
-
-  return (
-    <StyledWrapper>
-      <div
-        className="update-chip check-btn"
-        onClick={handleCheckUpdate}
-        title="Klik untuk periksa pembaruan aplikasi (Check for Updates)"
-        role="button"
-        tabIndex={0}
-        aria-label="Periksa Pembaruan Aplikasi"
-      >
-        <IconRotateClockwise size={12} strokeWidth={1.8} className="version-refresh-icon" aria-hidden="true" />
-        <span className="font-medium">v{displayVersion}</span>
-      </div>
+      ) : (
+        <div
+          className="update-chip check-btn"
+          onClick={handleCheckUpdate}
+          title="Klik untuk periksa pembaruan aplikasi (Check for Updates)"
+          role="button"
+          tabIndex={0}
+          aria-label="Periksa Pembaruan Aplikasi"
+        >
+          <IconRotateClockwise size={12} strokeWidth={1.8} className="version-refresh-icon" aria-hidden="true" />
+          <span className="font-medium">v{displayVersion}</span>
+        </div>
+      )}
     </StyledWrapper>
   );
 };
