@@ -9,7 +9,7 @@ import GrpcRequestPane from 'components/RequestPane/GrpcRequestPane/index';
 import ResponsePane from 'components/ResponsePane';
 import GrpcResponsePane from 'components/ResponsePane/GrpcResponsePane';
 import { findItemInCollection, findItemInCollectionByPathname, areItemsLoading } from 'utils/collections';
-import { cancelRequest, sendRequest } from 'providers/ReduxStore/slices/collections/actions';
+import { cancelRequest, sendRequest, closeTabs } from 'providers/ReduxStore/slices/collections/actions';
 import { updateGqlDocsOpen } from 'providers/ReduxStore/slices/tabs';
 import RequestNotFound from './RequestNotFound';
 import QueryUrl from 'components/RequestPane/QueryUrl/index';
@@ -48,6 +48,7 @@ import ApiSpecTab from 'components/ApiSpecTab';
 import MockServerDashboard from 'components/MockServer/MockServerDashboard';
 import MockResponse from 'components/MockServer/MockResponse';
 import ChangelogTab from 'components/ChangelogTab';
+import GitSyncModal from 'components/Git/GitSyncModal';
 import { resolveMockServerInstance } from 'utils/mock-server/mock-server-instances';
 import CollapsedPanelIndicator from './CollapsedPanelIndicator';
 import { clampRequestHeightForResponse } from './paneSize';
@@ -604,6 +605,18 @@ const RequestTabPanel = () => {
 
   if (focusedTab.type === 'api-spec') {
     return <ApiSpecTab tabUid={focusedTab.uid} />;
+  }
+
+  if (focusedTab.type === 'git') {
+    return (
+      <ScopedPersistenceProvider scope={focusedTab.uid}>
+        <GitSyncModal
+          collection={collection}
+          isTab={true}
+          onClose={() => dispatch(closeTabs({ tabUids: [focusedTab.uid] }))}
+        />
+      </ScopedPersistenceProvider>
+    );
   }
 
   if (!item || !item.uid) {

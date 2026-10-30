@@ -34,6 +34,29 @@ const StyledWrapper = styled.div`
     border-radius: 0 !important;
   }
 
+  &.as-tab {
+    height: 100% !important;
+    max-height: 100% !important;
+    min-height: 100% !important;
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    flex: 1;
+    overflow: hidden;
+
+    .git-header-bar {
+      border-top: none;
+    }
+
+    .git-tab-card-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+
   /* Global focus states */
   button:focus-visible,
   input:focus-visible,

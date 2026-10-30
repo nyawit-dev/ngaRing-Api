@@ -512,7 +512,14 @@ const CollectionRow = ({ collection, searchText, openBulkMenu, children, isColle
       label: 'Version Control (Git)',
       onClick: () => {
         ensureCollectionIsMounted();
-        setShowGitSyncModal(true);
+        dispatch(
+          addTab({
+            uid: `${collection.uid}-git`,
+            collectionUid: collection.uid,
+            type: 'git',
+            name: 'Git'
+          })
+        );
       }
     },
     {

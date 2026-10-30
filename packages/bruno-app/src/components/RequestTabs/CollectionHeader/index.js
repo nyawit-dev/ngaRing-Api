@@ -111,6 +111,18 @@ const CollectionHeader = ({ collection, isScratchCollection }) => {
   const [showGitSyncModal, setShowGitSyncModal] = useState(false);
   const [gitStatusRefreshKey, setGitStatusRefreshKey] = useState(0);
 
+  const openGitTab = () => {
+    if (!collection?.uid) return;
+    dispatch(
+      addTab({
+        uid: `${collection.uid}-git`,
+        collectionUid: collection.uid,
+        type: 'git',
+        name: 'Git'
+      })
+    );
+  };
+
   const closeGitSyncModal = () => {
     setShowGitSyncModal(false);
     setGitStatusRefreshKey((currentKey) => currentKey + 1);
@@ -345,7 +357,7 @@ const CollectionHeader = ({ collection, isScratchCollection }) => {
     ...(isMockServerEnabled
       ? [{ id: 'mock-server', label: 'Mock Server', leftSection: IconServer2, onClick: viewMockServer }]
       : []),
-    { id: 'git-sync', label: 'Version Control (Git)', leftSection: IconBrandGit, onClick: () => setShowGitSyncModal(true) },
+    { id: 'git-sync', label: 'Version Control (Git)', leftSection: IconBrandGit, onClick: openGitTab },
     { id: 'collection-settings', label: 'Collection Settings', leftSection: IconSettings, onClick: viewCollectionSettings }
   ];
 
@@ -811,10 +823,10 @@ const CollectionHeader = ({ collection, isScratchCollection }) => {
               <QuickGitWidget
                 key={gitStatusRefreshKey}
                 collection={collection}
-                onOpenGitModal={() => setShowGitSyncModal(true)}
+                onOpenGitModal={openGitTab}
               />
               <ToolHint text="Version Control (Git)" toolhintId="GitSyncToolhintId" place="bottom">
-                <ActionIcon onClick={() => setShowGitSyncModal(true)} aria-label="Version Control (Git)" size="sm" data-testid="git-sync">
+                <ActionIcon onClick={openGitTab} aria-label="Version Control (Git)" size="sm" data-testid="git-sync">
                   <IconBrandGit size={16} strokeWidth={1.5} />
                 </ActionIcon>
               </ToolHint>

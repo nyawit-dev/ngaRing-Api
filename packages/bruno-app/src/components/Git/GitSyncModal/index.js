@@ -69,7 +69,7 @@ import StyledWrapper from './StyledWrapper';
 
 const GITHUB_TOKEN_CREATE_URL = 'https://github.com/settings/tokens/new?scopes=repo&description=NgaRingApi%20Git%20Client';
 
-const GitSyncModal = ({ collection, onClose }) => {
+const GitSyncModal = ({ collection, onClose, isTab = false }) => {
   const collectionPath = collection?.pathname;
   const initialCache = getCachedGitStatus(collectionPath);
 
@@ -738,13 +738,19 @@ const GitSyncModal = ({ collection, onClose }) => {
     };
   };
 
-  // -------------------------------------------------------------
-  // Render: Initial Skeleton (Only if completely uncached on open)
-  // -------------------------------------------------------------
-  if (loading && !gitStatus) {
+  // Helper to render either in Modal (popup mode) or directly in workspace (tab mode)
+  const renderContainer = (content, { size = 'git', className = '', style = {} } = {}) => {
+    const combinedClass = [isTab ? 'as-tab' : '', className].filter(Boolean).join(' ');
+    if (isTab) {
+      return (
+        <StyledWrapper className={combinedClass} style={style}>
+          {content}
+        </StyledWrapper>
+      );
+    }
     return (
       <Modal
-        size="git"
+        size={size}
         hideHeader={true}
         hideClose={true}
         handleCancel={onClose}
@@ -752,31 +758,41 @@ const GitSyncModal = ({ collection, onClose }) => {
         noPadding={true}
         disableCloseOnOutsideClick={true}
       >
-        <StyledWrapper>
-          <div className="git-skeleton-shell" role="status" aria-live="polite">
-            <div className="sk-header">
-              <div className="skeleton-shimmer" style={{ width: '180px', height: '28px' }} />
-              <div className="skeleton-shimmer" style={{ width: '260px', height: '28px' }} />
-              <div className="skeleton-shimmer" style={{ width: '140px', height: '28px' }} />
-            </div>
-            <div className="sk-body">
-              <div className="sk-left">
-                <div className="skeleton-shimmer" style={{ width: '100%', height: '20px' }} />
-                <div className="skeleton-shimmer" style={{ width: '100%', height: '32px' }} />
-                <div className="skeleton-shimmer" style={{ width: '100%', height: '32px' }} />
-                <div className="skeleton-shimmer" style={{ width: '100%', height: '32px' }} />
-                <div style={{ marginTop: 'auto' }}>
-                  <div className="skeleton-shimmer" style={{ width: '100%', height: '80px' }} />
-                </div>
-              </div>
-              <div className="sk-right">
-                <div className="skeleton-shimmer" style={{ width: '30%', height: '24px' }} />
-                <div className="skeleton-shimmer" style={{ width: '100%', height: '220px' }} />
-              </div>
-            </div>
-          </div>
+        <StyledWrapper className={combinedClass} style={style}>
+          {content}
         </StyledWrapper>
       </Modal>
+    );
+  };
+
+  // -------------------------------------------------------------
+  // Render: Initial Skeleton (Only if completely uncached on open)
+  // -------------------------------------------------------------
+  if (loading && !gitStatus) {
+    return renderContainer(
+      <div className="git-skeleton-shell" role="status" aria-live="polite">
+        <div className="sk-header">
+          <div className="skeleton-shimmer" style={{ width: '180px', height: '28px' }} />
+          <div className="skeleton-shimmer" style={{ width: '260px', height: '28px' }} />
+          <div className="skeleton-shimmer" style={{ width: '140px', height: '28px' }} />
+        </div>
+        <div className="sk-body">
+          <div className="sk-left">
+            <div className="skeleton-shimmer" style={{ width: '100%', height: '20px' }} />
+            <div className="skeleton-shimmer" style={{ width: '100%', height: '32px' }} />
+            <div className="skeleton-shimmer" style={{ width: '100%', height: '32px' }} />
+            <div className="skeleton-shimmer" style={{ width: '100%', height: '32px' }} />
+            <div style={{ marginTop: 'auto' }}>
+              <div className="skeleton-shimmer" style={{ width: '100%', height: '80px' }} />
+            </div>
+          </div>
+          <div className="sk-right">
+            <div className="skeleton-shimmer" style={{ width: '30%', height: '24px' }} />
+            <div className="skeleton-shimmer" style={{ width: '100%', height: '220px' }} />
+          </div>
+        </div>
+      </div>,
+      { size: 'git' }
     );
   }
 
@@ -784,94 +800,76 @@ const GitSyncModal = ({ collection, onClose }) => {
   // Render: Uninitialized Repository View
   // -------------------------------------------------------------
   if (!isRepoInitialized) {
-    return (
-      <Modal
-        size="md"
-        hideHeader={true}
-        hideClose={true}
-        handleCancel={onClose}
-        hideFooter={true}
-        noPadding={true}
-        disableCloseOnOutsideClick={true}
-      >
-        <StyledWrapper style={{ height: 'auto', minHeight: 'auto' }}>
-          <div className="git-header-bar">
-            <div className="git-header-left">
-              <div className="git-branding-badge">
-                <span className="cat-brand-avatar">🐱</span>
-                <div className="cat-brand-info">
-                  <span className="cat-brand-title">NgaRing</span>
-                  <span className="cat-brand-sub">Git Studio</span>
-                </div>
+    return renderContainer(
+      <>
+        <div className="git-header-bar">
+          <div className="git-header-left">
+            <div className="git-branding-badge">
+              <span className="cat-brand-avatar">🐱</span>
+              <div className="cat-brand-info">
+                <span className="cat-brand-title">NgaRing</span>
+                <span className="cat-brand-sub">Git Studio</span>
               </div>
-              <span className="git-repo-pill">
-                <IconFolder size={15} className="repo-icon" />
-                <span className="repo-title">{collection?.name || 'Collection'}</span>
-              </span>
             </div>
-            <div className="git-header-right">
-              <button
-                type="button"
-                className="git-dialog-close-btn"
-                onClick={onClose}
-                title="Tutup dialog Git (Esc)"
-                aria-label="Tutup dialog Git"
-              >
-                <IconX size={14} strokeWidth={2.2} />
-                <span className="close-text">Tutup</span>
-                <span className="close-kbd">Esc</span>
-              </button>
+            <span className="git-repo-pill">
+              <IconFolder size={15} className="repo-icon" />
+              <span className="repo-title">{collection?.name || 'Collection'}</span>
+            </span>
+          </div>
+          <div className="git-header-right">
+            <button
+              type="button"
+              className="git-dialog-close-btn"
+              onClick={onClose}
+              title={isTab ? 'Tutup tab Git (Esc)' : 'Tutup dialog Git (Esc)'}
+              aria-label="Tutup dialog Git"
+            >
+              <IconX size={14} strokeWidth={2.2} />
+              <span className="close-text">Tutup</span>
+              <span className="close-kbd">Esc</span>
+            </button>
+          </div>
+        </div>
+        <div className="git-tab-card-container" style={{ padding: '2rem 1.5rem', textAlign: 'center' }}>
+          <div className="git-card" style={{ alignItems: 'center', textAlign: 'center', padding: '2rem', margin: 'auto', maxWidth: '520px' }}>
+            <div
+              style={{
+                width: '54px',
+                height: '54px',
+                borderRadius: '12px',
+                backgroundColor: 'rgba(234, 179, 8, 0.12)',
+                color: '#eab308',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '0.5rem'
+              }}
+            >
+              <IconBrandGit size={32} />
+            </div>
+            <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600 }}>Initialize Git Version Control</h3>
+            <p style={{ margin: 0, fontSize: '0.8125rem', color: 'gray', maxWidth: '380px' }}>
+              Track changes, review revisions, and sync your API collections with remote repositories like GitHub.
+            </p>
+            <div style={{ marginTop: '0.75rem' }}>
+              <Button color="primary" onClick={handleInitRepo} loading={loading}>
+                Initialize Git Repository
+              </Button>
             </div>
           </div>
-          <div className="git-tab-card-container" style={{ padding: '2rem 1.5rem', textAlign: 'center' }}>
-            <div className="git-card" style={{ alignItems: 'center', textAlign: 'center', padding: '2rem' }}>
-              <div
-                style={{
-                  width: '54px',
-                  height: '54px',
-                  borderRadius: '12px',
-                  backgroundColor: 'rgba(234, 179, 8, 0.12)',
-                  color: '#eab308',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: '0.5rem'
-                }}
-              >
-                <IconBrandGit size={32} />
-              </div>
-              <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600 }}>Initialize Git Version Control</h3>
-              <p style={{ margin: 0, fontSize: '0.8125rem', color: 'gray', maxWidth: '380px' }}>
-                Track changes, review revisions, and sync your API collections with remote repositories like GitHub.
-              </p>
-              <div style={{ marginTop: '0.75rem' }}>
-                <Button color="primary" onClick={handleInitRepo} loading={loading}>
-                  Initialize Git Repository
-                </Button>
-              </div>
-            </div>
-          </div>
-        </StyledWrapper>
-      </Modal>
+        </div>
+      </>,
+      { size: 'md', style: isTab ? {} : { height: 'auto', minHeight: 'auto' } }
     );
   }
 
   // -------------------------------------------------------------
-  // Render: Complete Polished Git Modal View
+  // Render: Complete Polished Git View (Tab or Modal)
   // -------------------------------------------------------------
-  return (
-    <Modal
-      size={isMaximized ? 'git is-maximized' : 'git'}
-      hideHeader={true}
-      hideClose={true}
-      handleCancel={onClose}
-      hideFooter={true}
-      noPadding={true}
-      disableCloseOnOutsideClick={true}
-    >
-      <StyledWrapper className={isMaximized ? 'is-maximized' : ''}>
-        {/* Top Header Bar */}
-        <div className="git-header-bar">
+  return renderContainer(
+    <>
+      {/* Top Header Bar */}
+      <div className="git-header-bar">
           <div className="git-header-left">
             <div className="git-branding-badge">
               <span className="cat-brand-avatar">🐱</span>
@@ -1069,24 +1067,27 @@ const GitSyncModal = ({ collection, onClose }) => {
                 <IconRefresh size={14} />
               </button>
 
-              <div className="git-header-divider" />
-
-              <button
-                type="button"
-                className={`git-view-toggle-btn ${isMaximized ? 'is-active' : ''}`}
-                onClick={() => setIsMaximized((prev) => !prev)}
-                title={isMaximized ? 'Kembalikan ke ukuran normal' : 'Perluas tampilan layar penuh'}
-                aria-label={isMaximized ? 'Perkecil tampilan' : 'Perbesar layar penuh'}
-              >
-                {isMaximized ? <IconMinimize size={13} strokeWidth={2} /> : <IconMaximize size={13} strokeWidth={2} />}
-                <span className="toggle-label">{isMaximized ? 'Normal' : 'Layar Penuh'}</span>
-              </button>
+              {!isTab && (
+                <>
+                  <div className="git-header-divider" />
+                  <button
+                    type="button"
+                    className={`git-view-toggle-btn ${isMaximized ? 'is-active' : ''}`}
+                    onClick={() => setIsMaximized((prev) => !prev)}
+                    title={isMaximized ? 'Kembalikan ke ukuran normal' : 'Perluas tampilan layar penuh'}
+                    aria-label={isMaximized ? 'Perkecil tampilan' : 'Perbesar layar penuh'}
+                  >
+                    {isMaximized ? <IconMinimize size={13} strokeWidth={2} /> : <IconMaximize size={13} strokeWidth={2} />}
+                    <span className="toggle-label">{isMaximized ? 'Normal' : 'Layar Penuh'}</span>
+                  </button>
+                </>
+              )}
 
               <button
                 type="button"
                 className="git-dialog-close-btn"
                 onClick={onClose}
-                title="Tutup Git Studio (Esc)"
+                title={isTab ? 'Tutup tab Git (Esc)' : 'Tutup Git Studio (Esc)'}
                 aria-label="Tutup Git Studio"
               >
                 <IconX size={14} strokeWidth={2.2} />
@@ -1865,9 +1866,12 @@ const GitSyncModal = ({ collection, onClose }) => {
             </div>
           </div>
         )}
-      </StyledWrapper>
-    </Modal>
-  );
-};
+      </>,
+      {
+        size: isMaximized ? 'git is-maximized' : 'git',
+        className: isMaximized ? 'is-maximized' : ''
+      }
+    );
+  };
 
 export default GitSyncModal;
