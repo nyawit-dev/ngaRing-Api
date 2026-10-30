@@ -1,18 +1,17 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import find from 'lodash/find';
-import { IconSettings, IconCookie, IconTool, IconSearch, IconPalette, IconBrandGithub, IconRotateClockwise } from '@tabler/icons';
-import toast from 'react-hot-toast';
+import { IconSettings, IconCookie, IconTool, IconSearch, IconPalette, IconBrandGithub } from '@tabler/icons';
 import Mousetrap from 'mousetrap';
 import { getKeyBindingsForActionAllOS } from 'providers/Hotkeys/keyMappings';
 import ToolHint from 'components/ToolHint';
 import Cookies from 'components/Cookies';
 import Notifications from 'components/Notifications';
 import Portal from 'components/Portal';
+import UpdateNotification from 'components/Updater/UpdateNotification';
 import ThemeDropdown from './ThemeDropdown';
 import { openConsole } from 'providers/ReduxStore/slices/logs';
 import { addTab } from 'providers/ReduxStore/slices/tabs';
-import { useApp } from 'providers/App';
 import StyledWrapper from './StyledWrapper';
 
 const StatusBar = () => {
@@ -24,7 +23,6 @@ const StatusBar = () => {
   const activeTab = find(tabs, (t) => t.uid === activeTabUid);
   const logs = useSelector((state) => state.logs.logs);
   const [cookiesOpen, setCookiesOpen] = useState(false);
-  const { version } = useApp();
 
   const activeWorkspace = workspaces.find((w) => w.uid === activeWorkspaceUid);
 
@@ -51,16 +49,6 @@ const StatusBar = () => {
     bindings.forEach((binding) => {
       Mousetrap.trigger(binding);
     });
-  };
-
-  const handleCheckUpdate = () => {
-    const { ipcRenderer } = window;
-    if (!ipcRenderer) return;
-    toast.loading('Memeriksa pembaruan ke GitHub Releases...', { id: 'manual-update-check' });
-    ipcRenderer.invoke('updater:check-for-updates')
-      .catch((err) => {
-        toast.error(`Gagal memeriksa pembaruan: ${err?.message || 'Error'}`, { id: 'manual-update-check' });
-      });
   };
 
   return (
@@ -124,22 +112,6 @@ const StatusBar = () => {
                 <IconBrandGithub size={16} strokeWidth={1.5} aria-hidden="true" />
               </button>
             </ToolHint>
-
-            <div className="status-bar-divider" style={{ margin: '0 4px' }} />
-
-            <ToolHint text="Klik untuk Periksa Pembaruan Aplikasi" toolhintId="CheckUpdateBottomLeft" place="top-start" offset={10}>
-              <button
-                className="status-bar-button status-bar-version-btn"
-                onClick={handleCheckUpdate}
-                tabIndex={0}
-                aria-label="Periksa Pembaruan Aplikasi"
-                title="Klik untuk periksa pembaruan aplikasi"
-              >
-                <div className="console-button-content">
-                  <span className="console-label font-medium">v{version}</span>
-                </div>
-              </button>
-            </ToolHint>
           </div>
         </div>
 
@@ -189,20 +161,7 @@ const StatusBar = () => {
 
             <div className="status-bar-divider"></div>
 
-            <ToolHint text="Periksa Pembaruan (Check for Updates)" toolhintId="CheckUpdate" place="top-end" offset={10}>
-              <button
-                className="status-bar-button status-bar-version-btn"
-                onClick={handleCheckUpdate}
-                tabIndex={0}
-                aria-label="Periksa Pembaruan Aplikasi"
-                title="Klik untuk periksa pembaruan aplikasi"
-              >
-                <div className="console-button-content">
-                  <IconRotateClockwise size={12} strokeWidth={1.8} className="version-refresh-icon" aria-hidden="true" />
-                  <span className="console-label">v{version}</span>
-                </div>
-              </button>
-            </ToolHint>
+            <UpdateNotification />
           </div>
         </div>
       </div>

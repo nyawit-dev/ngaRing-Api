@@ -23,7 +23,6 @@ import IconBottombarToggle from 'components/Icons/IconBottombarToggle/index';
 import AppMenu from './AppMenu';
 import StyledWrapper from './StyledWrapper';
 import ResponseLayoutToggle from 'components/ResponsePane/ResponseLayoutToggle';
-import UpdateNotification from 'components/Updater/UpdateNotification';
 import { isMacOS, isWindowsOS, isLinuxOS } from 'utils/common/platform';
 import classNames from 'classnames';
 
@@ -325,7 +324,6 @@ const AppTitleBar = () => {
               <IconBottombarToggle collapsed={!isConsoleOpen} size={16} strokeWidth={1.5} />
             </ActionIcon>
 
-            <UpdateNotification />
             <ResponseLayoutToggle />
           </div>
 

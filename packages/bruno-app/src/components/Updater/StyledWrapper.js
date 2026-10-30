@@ -7,12 +7,12 @@ const StyledWrapper = styled.div`
   .update-chip {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    height: 24px;
-    padding: 0 10px;
+    gap: 5px;
+    height: 20px;
+    padding: 0 6px;
     font-size: 11px;
     font-weight: 500;
-    border-radius: 6px;
+    border-radius: 4px;
     cursor: pointer;
     user-select: none;
     transition: all 140ms ease;
@@ -20,15 +20,25 @@ const StyledWrapper = styled.div`
     line-height: 1;
 
     &.check-btn {
-      background: ${(props) => props.theme.background?.surface0 || '#1e1e2e'};
-      border-color: ${(props) => props.theme.border?.border0 || '#313244'};
-      color: ${(props) => props.theme.text?.subtext0 || '#a6adc8'};
-      font-size: 11px;
+      background: transparent;
+      border-color: transparent;
+      color: inherit;
+      opacity: 0.85;
+
+      .version-refresh-icon {
+        opacity: 0.6;
+        transition: transform 0.25s ease, opacity 0.2s ease;
+      }
 
       &:hover {
-        background: ${(props) => props.theme.background?.surface1 || '#313244'};
-        color: ${(props) => props.theme.text || '#cdd6f4'};
-        border-color: ${(props) => props.theme.primary?.solid || '#eab308'};
+        background: ${(props) => props.theme.sidebar?.hoverBg || 'rgba(255, 255, 255, 0.08)'};
+        color: #38bdf8;
+        opacity: 1;
+
+        .version-refresh-icon {
+          opacity: 1;
+          transform: rotate(180deg);
+        }
       }
     }
 

@@ -1,10 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { IconBolt, IconDownload, IconCheck, IconRotateClockwise } from '@tabler/icons';
 import toast from 'react-hot-toast';
+import { useApp } from 'providers/App';
 import StyledWrapper from './StyledWrapper';
 import UpdateModal from './UpdateModal';
 
 const UpdateNotification = () => {
+  const { version } = useApp();
   const [updateState, setUpdateState] = useState({
     status: 'idle',
     currentVersion: '',
@@ -236,18 +238,21 @@ const UpdateNotification = () => {
     );
   }
 
-  // Default: Check Update Button
+  // Default: Version badge & Check Update button (Single bottom-right entry point)
+  const displayVersion = updateState.currentVersion || version;
+
   return (
     <StyledWrapper>
       <div
         className="update-chip check-btn"
         onClick={handleCheckUpdate}
-        title="Periksa Pembaruan Aplikasi (Check for Updates)"
+        title="Klik untuk periksa pembaruan aplikasi (Check for Updates)"
         role="button"
         tabIndex={0}
+        aria-label="Periksa Pembaruan Aplikasi"
       >
-        <IconRotateClockwise size={12} strokeWidth={2} />
-        <span>Check Update</span>
+        <IconRotateClockwise size={12} strokeWidth={1.8} className="version-refresh-icon" aria-hidden="true" />
+        <span className="font-medium">v{displayVersion}</span>
       </div>
     </StyledWrapper>
   );
