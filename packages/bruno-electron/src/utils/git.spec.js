@@ -80,3 +80,13 @@ describe('parseRemoteBranches', () => {
     expect(parseRemoteBranches(undefined)).toEqual({ branches: [], defaultBranch: null });
   });
 });
+
+describe('cloneGitRepository', () => {
+  const win = { webContents: { send: jest.fn() } };
+
+  it('enables core.longpaths so deeply nested files can be checked out on Windows', async () => {
+    await cloneGitRepository(win, { url: 'https://example.com/repo.git', path: '/collections/repo', processUid: 'p1' });
+
+    expect(simpleGit).toHaveBeenCalledWith({ baseDir: '/collections/repo', config: ['core.longpaths=true'] });
+  });
+});
