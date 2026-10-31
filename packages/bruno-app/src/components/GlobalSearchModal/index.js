@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch, useStore } from 'react-redux';
+import { selectCollections, selectActiveWorkspace } from 'src/selectors/collections';
+import { selectTabByUid } from 'src/selectors/tab';
 import {
   IconSearch,
   IconX,
@@ -51,7 +53,10 @@ const GlobalSearchModal = ({ isOpen, onClose, onOpenNewRequest }) => {
   const preferences = useSelector((state) => state.app.preferences);
   const sidebarCollapsed = useSelector((state) => state.app.sidebarCollapsed);
 
-  const activeWorkspace = workspaces.find((w) => w.uid === activeWorkspaceUid);
+  // Intentional whole-array subscription: the search renders results derived
+  // from every collection, and the modal is only mounted while open, so it is
+  // never on the keystroke path.
+  const allCollections = useSelector(selectCollections);
 
   const collections = useMemo(() => {
     if (!activeWorkspace) return allCollections;
@@ -60,7 +65,7 @@ const GlobalSearchModal = ({ isOpen, onClose, onOpenNewRequest }) => {
       activeWorkspace.collections?.map((wc) => normalizePath(wc.path)) || []
     );
     return allCollections.filter((c) => workspacePaths.has(normalizePath(c.pathname)));
-  }, [activeWorkspace, allCollections, workspaces]);
+  }, [activeWorkspace, allCollections]);
 
   const getBuiltInCommands = useCallback(() => {
     const isMac = isMacOS();
@@ -483,7 +488,8 @@ const GlobalSearchModal = ({ isOpen, onClose, onOpenNewRequest }) => {
     expandItemPath(result);
 
     if (result.type === SEARCH_TYPES.REQUEST) {
-      const existingTab = tabs.find((tab) => tab.uid === result.item.uid);
+      // Only needed at click time; no reason to subscribe the modal to tabs.
+      const existingTab = selectTabByUid(store.getState(), result.item.uid);
 
       if (existingTab) {
         dispatch(focusTab({ uid: result.item.uid }));
